@@ -106,14 +106,8 @@ export default function HistoryPage() {
             staggerDelay={0.1}
             delay={0.3}
           >
-            {history.map((item, index) => {
-              const topTrait = Object.entries(item.traits).sort(
-                ([, a], [, b]) => b - a
-              )[0];
-              const topTraitName = topTrait[0];
-              const topTraitScore = topTrait[1];
-
-              return (
+              {history.map((item) => {
+                return (
                 <motion.div
                   key={item.assessment_id}
                   whileHover={{ y: -8, scale: 1.02 }}
@@ -137,24 +131,30 @@ export default function HistoryPage() {
                     {/* Mini Trait Preview */}
                     <div className="mb-4 flex-1">
                       <div className="space-y-2">
-                        {Object.entries(item.traits)
-                          .slice(0, 3)
-                          .map(([trait, score]) => (
-                            <div key={trait} className="flex items-center gap-2">
-                              <span className="text-xs text-white/60 w-8">
-                                {trait}
-                              </span>
-                              <div className="flex-1 bg-white/10 rounded-full h-2">
+                          {Object.entries(item.traits)
+                            .slice(0, 3)
+                            .map(([trait, score]) => {
+                              const safeScore = score ?? 0;
+                              return (
                                 <div
-                                  className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500"
-                                  style={{ width: `${score}%` }}
-                                />
-                              </div>
-                              <span className="text-xs text-white/80 w-10 text-right">
-                                {score.toFixed(0)}%
-                              </span>
-                            </div>
-                          ))}
+                                  key={trait}
+                                  className="flex items-center gap-2"
+                                >
+                                  <span className="text-xs text-white/60 w-8">
+                                    {trait}
+                                  </span>
+                                  <div className="flex-1 bg-white/10 rounded-full h-2">
+                                    <div
+                                      className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500"
+                                      style={{ width: `${safeScore}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-xs text-white/80 w-10 text-right">
+                                    {Math.round(safeScore)}%
+                                  </span>
+                                </div>
+                              );
+                            })}
                       </div>
                     </div>
 
