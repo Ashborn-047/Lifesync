@@ -136,6 +136,26 @@ The backend API will be available at `http://localhost:5174`
 
 The web app will be available at `http://localhost:3000`
 
+### Web Deployment
+
+To deploy the web app for your colleagues to view:
+
+1. **Quick Deploy (Vercel - Recommended)**:
+   - Sign up at [vercel.com](https://vercel.com)
+   - Import repository: `Ashborn-047/Lifesync`
+   - Set root directory to `web`
+   - Add environment variable: `NEXT_PUBLIC_API_URL` (your backend URL)
+   - Deploy automatically on every push
+
+2. **Other Options**:
+   - See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed instructions
+   - Netlify, GitHub Pages, Docker, and self-hosted options available
+
+3. **Automated Deployment**:
+   - GitHub Actions workflow included (`.github/workflows/deploy-web.yml`)
+   - Automatically builds and tests on every push
+   - Can auto-deploy to Vercel if configured
+
 ### Mobile Setup
 
 1. Navigate to mobile directory:
