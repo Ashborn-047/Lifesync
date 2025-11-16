@@ -17,6 +17,7 @@ ios/
 .env
 .env.*
 .env.local
+!.env.example
 
 # Build artifacts
 .next/
@@ -25,8 +26,6 @@ build/
 
 # Metro bundler cache
 metro-cache/
-.expo/
-.expo-shared/
 
 # TypeScript
 *.tsbuildinfo
@@ -98,11 +97,13 @@ local.properties
 # Logs
 logs/
 *.log
+lerna-debug.log*
 
 # Testing
 .coverage
 .pytest_cache/
 htmlcov/
+.nyc_output
 
 # Build artifacts
 *.pyc
@@ -120,6 +121,8 @@ tmp/
 *.tmp
 *.cache
 .watchmanconfig
+.eslintcache
+.stylelintcache
 
 # Expo cache
 .expo/
@@ -140,3 +143,45 @@ metro-cache/
 *.json.bak
 stress_test_results.json
 scoring_variation_results.json
+
+# Additional Node.js ignores
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+pids
+*.pid
+*.seed
+*.pid.lock
+lib-cov
+coverage
+*.lcov
+.grunt
+bower_components
+.lock-wscript
+build/Release
+jspm_packages/
+web_modules/
+.node_repl_history
+*.tgz
+.yarn-integrity
+.parcel-cache
+out
+.nuxt
+.vuepress/dist
+.svelte-kit/
+**/.vitepress/dist
+**/.vitepress/cache
+.docusaurus
+.serverless/
+.fusebox/
+.dynamodb/
+.firebase/
+.tern-port
+.vscode-test
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*

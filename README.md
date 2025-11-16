@@ -157,13 +157,24 @@ The web app will be available at `http://localhost:3000`
 
 4. Start Expo development server:
    ```bash
-   npx expo start --tunnel
+   npx expo start --lan
    ```
+   
+   **Note**: Use `--lan` instead of `--tunnel` for faster startup (60-90 seconds faster). Tunnel mode is only needed if you're not on the same network.
 
 5. Connect with Expo Go:
    - Install Expo Go app on your mobile device
-   - Scan the QR code or use the tunnel URL
-   - Ensure your mobile and PC are on the same network (or use tunnel mode)
+   - Scan the QR code or use the LAN URL
+   - Ensure your mobile and PC are on the same network
+
+## Performance Tips
+
+To avoid slow command loading:
+
+1. **Use LAN mode instead of tunnel**: `npx expo start --lan` (much faster)
+2. **Install Expo CLI globally**: `npm install -g expo-cli` then use `expo start --lan`
+3. **Exclude cache files**: Already configured in `.gitignore`
+4. **Clear caches if needed**: `npm cache clean --force` and remove `node_modules/.cache`
 
 ## Future Roadmap
 
