@@ -2,7 +2,7 @@
  * Helper function to get persona data by MBTI type
  */
 
-import { PERSONA_PROFILES, type PersonaProfile } from "@/data/personas";
+import { PERSONA_PROFILES, type PersonaProfile } from "@/src/data/personas";
 
 /**
  * Get persona profile by MBTI type

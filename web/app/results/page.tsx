@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -31,7 +31,7 @@ import {
 import { useToast } from "@/components/ui/Toast";
 import type { AssessmentResult, ParsedExplanation } from "@/lib/types";
 
-export default function ResultsPage() {
+function ResultsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { showToast } = useToast();
@@ -757,5 +757,13 @@ export default function ResultsPage() {
         </motion.div>
       </div>
     </main>
+  );
+}
+
+export default function ResultsPage() {
+  return (
+    <Suspense fallback={<LoadingOverlay message="Loading results..." />}>
+      <ResultsPageContent />
+    </Suspense>
   );
 }
