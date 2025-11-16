@@ -120,7 +120,7 @@ jobs:
       
       - name: Deploy to Vercel (if configured)
         uses: amondnet/vercel-action@v25
-        if: ${{ secrets.VERCEL_TOKEN != '' }}
+        if: ${{ secrets.VERCEL_TOKEN }}
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
