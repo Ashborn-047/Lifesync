@@ -1,0 +1,29 @@
+# Render Blueprint Configuration for LifeSync Backend
+# This file can be used for automated setup, but manual setup is also fine
+
+services:
+  - type: web
+    name: lifesync-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.api.server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SUPABASE_URL
+        sync: false  # Set manually in Render dashboard
+      - key: SUPABASE_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: SUPABASE_SERVICE_ROLE
+        sync: false  # Set manually in Render dashboard
+      - key: OPENAI_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: GEMINI_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: GROK_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: API_HOST
+        value: 0.0.0.0
+
