@@ -2,7 +2,37 @@
 
 This is a **5-minute guide** to get your web app live so colleagues can see it.
 
-## Option 1: Vercel (Easiest - 3 minutes) ⭐
+## Option 1: GitHub Pages (Free & Automatic) ⭐⭐
+
+### Step 1: Enable GitHub Pages (1 minute)
+1. Go to your repository: `https://github.com/Ashborn-047/Lifesync`
+2. Click **Settings** → **Pages** (left sidebar)
+3. Under **Source**, select: **GitHub Actions**
+4. Click **Save**
+
+### Step 2: Set Environment Variable (Optional)
+1. Go to **Settings** → **Secrets and variables** → **Actions**
+2. Click **New repository secret**
+3. Add:
+   - **Name**: `NEXT_PUBLIC_API_URL`
+   - **Value**: Your backend API URL
+4. Click **Add secret**
+
+### Step 3: Deploy (Automatic!)
+1. Push any change to `main` branch (or manually trigger workflow)
+2. Go to **Actions** tab to watch deployment
+3. **Done!** Your site will be live at:
+   - `https://ashborn-047.github.io/Lifesync/`
+
+### ✅ Benefits:
+- **Free** - No cost
+- **Automatic** - Deploys on every push
+- **HTTPS** - Secure by default
+- **Custom Domain** - Can use your own domain
+
+---
+
+## Option 2: Vercel (Easiest - 3 minutes)
 
 ### Step 1: Sign Up
 1. Go to **[vercel.com](https://vercel.com)** and sign up with GitHub

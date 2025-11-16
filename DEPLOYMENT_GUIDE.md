@@ -57,24 +57,59 @@ Add in Netlify settings:
 
 ---
 
-### Option 3: GitHub Pages (Static Export)
+### Option 3: GitHub Pages (Recommended for Free Hosting) ⭐
 
-For static hosting (requires Next.js static export):
+GitHub Pages provides free hosting directly from your repository.
 
-1. Update `next.config.mjs`:
-```javascript
-const nextConfig = {
-  output: 'export',
-  images: { unoptimized: true }
-};
-```
+#### Automatic Deployment (GitHub Actions)
 
-2. Build and deploy:
+**Already configured!** The workflow `.github/workflows/deploy-github-pages.yml` will:
+- ✅ Build your app on every push to `main`
+- ✅ Deploy automatically to GitHub Pages
+- ✅ Update on every code change
+
+#### Step 1: Enable GitHub Pages
+
+1. Go to your repository: `https://github.com/Ashborn-047/Lifesync`
+2. Click **Settings** → **Pages**
+3. Under **Source**, select:
+   - **Source**: `GitHub Actions`
+4. Save
+
+#### Step 2: Set Environment Variable (Optional)
+
+1. Go to **Settings** → **Secrets and variables** → **Actions**
+2. Add secret:
+   - **Name**: `NEXT_PUBLIC_API_URL`
+   - **Value**: Your backend API URL (e.g., `https://your-backend.com`)
+
+#### Step 3: Deploy
+
+1. Push to `main` branch (or manually trigger workflow)
+2. Go to **Actions** tab to see deployment progress
+3. Once complete, your site will be at:
+   - `https://ashborn-047.github.io/Lifesync/` (if repository name is `Lifesync`)
+   - Or your custom domain if configured
+
+#### Manual Deployment (Alternative)
+
+If you prefer manual deployment:
+
+1. Build locally:
 ```bash
 cd web
 npm run build
-# Deploy the 'out' folder to GitHub Pages
 ```
+
+2. The `out` folder contains static files
+3. Push `out` folder contents to `gh-pages` branch or use GitHub Pages settings
+
+#### Notes:
+- ✅ Free hosting
+- ✅ Automatic HTTPS
+- ✅ Custom domain support
+- ⚠️ Static export only (no server-side features)
+- ⚠️ API calls must be to publicly accessible backend
 
 ---
 
