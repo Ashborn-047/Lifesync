@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+supabase
+httpx
+openai
+google-generativeai
+numpy
+pandas
+pytest
+pytest-asyncio
+reportlab

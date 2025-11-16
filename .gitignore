@@ -1,0 +1,142 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Expo / React Native
+.expo/
+.expo-shared/
+.expo/web-build/
+android/
+ios/
+*.jks
+*.keystore
+
+# Environment files
+.env
+.env.*
+.env.local
+
+# Build artifacts
+.next/
+dist/
+build/
+
+# Metro bundler cache
+metro-cache/
+.expo/
+.expo-shared/
+
+# TypeScript
+*.tsbuildinfo
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+env/
+ENV/
+.venv
+
+# iOS
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+project.xcworkspace
+
+# Android
+*.apk
+*.ap_
+*.aab
+.gradle/
+local.properties
+*.iml
+.idea/
+*.hprof
+.cxx/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Build artifacts
+*.pyc
+*.pyo
+*.pyd
+
+# Performance & Cache files (to avoid slow command loading)
+.npm/
+.yarn/
+.pnp/
+.pnp.js
+.cache/
+.temp/
+tmp/
+*.tmp
+*.cache
+.watchmanconfig
+
+# Expo cache
+.expo/
+.expo-shared/
+.expo/web-build/
+.expo/cache/
+
+# Metro bundler
+.metro/
+metro-cache/
+
+# Package manager locks (optional - some teams prefer to commit these)
+# Uncomment if you want to exclude them for faster installs
+# package-lock.json
+# yarn.lock
+
+# Large data files
+*.json.bak
+stress_test_results.json
+scoring_variation_results.json
