@@ -12,44 +12,44 @@ on:
       - main
     paths:
       - 'web/**'
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch:
 
 jobs:
   build-and-test:
     name: Build and Test Web App
     runs-on: ubuntu-latest
-    
+
+    # 👇 THIS FIXES THE ROOT ISSUE
     defaults:
       run:
         working-directory: ./web
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Determine package manager
         id: detect
         run: |
-          if [ -f "./web/package-lock.json" ]; then
+          if [ -f "package-lock.json" ]; then
             echo "manager=npm" >> $GITHUB_OUTPUT
-          elif [ -f "./web/yarn.lock" ]; then
+          elif [ -f "yarn.lock" ]; then
             echo "manager=yarn" >> $GITHUB_OUTPUT
-          elif [ -f "./web/pnpm-lock.yaml" ]; then
+          elif [ -f "pnpm-lock.yaml" ]; then
             echo "manager=pnpm" >> $GITHUB_OUTPUT
           else
             echo "No lockfile found!"
             exit 1
           fi
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: ${{ steps.detect.outputs.manager }}
           cache-dependency-path: ./web/package-lock.json
-      
+
       - name: Install dependencies
-        working-directory: ./web
         run: |
           if [ "${{ steps.detect.outputs.manager }}" = "npm" ]; then
             npm ci
@@ -58,11 +58,11 @@ jobs:
           else
             pnpm install --frozen-lockfile
           fi
-      
+
       - name: Run linter
         run: npm run lint
         continue-on-error: true
-      
+
       - name: Set API URL
         id: set-api-url
         run: |
@@ -71,13 +71,12 @@ jobs:
           else
             echo "API_URL=http://localhost:5174" >> $GITHUB_ENV
           fi
-      
+
       - name: Build application
-        working-directory: ./web
         run: npm run build
         env:
           NEXT_PUBLIC_API_URL: ${{ env.API_URL }}
-      
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -90,34 +89,38 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-test
     if: github.event_name == 'pull_request'
-    
+
+    # 👇 APPLY DEFAULT WORKING DIRECTORY HERE TOO
+    defaults:
+      run:
+        working-directory: ./web
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Determine package manager
         id: detect
         run: |
-          if [ -f "./web/package-lock.json" ]; then
+          if [ -f "package-lock.json" ]; then
             echo "manager=npm" >> $GITHUB_OUTPUT
-          elif [ -f "./web/yarn.lock" ]; then
+          elif [ -f "yarn.lock" ]; then
             echo "manager=yarn" >> $GITHUB_OUTPUT
-          elif [ -f "./web/pnpm-lock.yaml" ]; then
+          elif [ -f "pnpm-lock.yaml" ]; then
             echo "manager=pnpm" >> $GITHUB_OUTPUT
           else
             echo "No lockfile found!"
             exit 1
           fi
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: ${{ steps.detect.outputs.manager }}
           cache-dependency-path: ./web/package-lock.json
-      
+
       - name: Install dependencies
-        working-directory: ./web
         run: |
           if [ "${{ steps.detect.outputs.manager }}" = "npm" ]; then
             npm ci
@@ -126,7 +129,7 @@ jobs:
           else
             pnpm install --frozen-lockfile
           fi
-      
+
       - name: Set API URL
         id: set-api-url
         run: |
@@ -135,13 +138,12 @@ jobs:
           else
             echo "API_URL=http://localhost:5174" >> $GITHUB_ENV
           fi
-      
+
       - name: Build for preview
-        working-directory: ./web
         run: npm run build
         env:
           NEXT_PUBLIC_API_URL: ${{ env.API_URL }}
-      
+
       - name: Comment PR with preview info
         uses: actions/github-script@v7
         with:
@@ -158,34 +160,38 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
+
+    # 👇 APPLY DEFAULT WORKING DIRECTORY HERE TOO
+    defaults:
+      run:
+        working-directory: ./web
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Determine package manager
         id: detect
         run: |
-          if [ -f "./web/package-lock.json" ]; then
+          if [ -f "package-lock.json" ]; then
             echo "manager=npm" >> $GITHUB_OUTPUT
-          elif [ -f "./web/yarn.lock" ]; then
+          elif [ -f "yarn.lock" ]; then
             echo "manager=yarn" >> $GITHUB_OUTPUT
-          elif [ -f "./web/pnpm-lock.yaml" ]; then
+          elif [ -f "pnpm-lock.yaml" ]; then
             echo "manager=pnpm" >> $GITHUB_OUTPUT
           else
             echo "No lockfile found!"
             exit 1
           fi
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: ${{ steps.detect.outputs.manager }}
           cache-dependency-path: ./web/package-lock.json
-      
+
       - name: Install dependencies
-        working-directory: ./web
         run: |
           if [ "${{ steps.detect.outputs.manager }}" = "npm" ]; then
             npm ci
@@ -194,7 +200,7 @@ jobs:
           else
             pnpm install --frozen-lockfile
           fi
-      
+
       - name: Set API URL
         id: set-api-url
         run: |
@@ -203,13 +209,12 @@ jobs:
           else
             echo "API_URL=http://localhost:5174" >> $GITHUB_ENV
           fi
-      
+
       - name: Build for production
-        working-directory: ./web
         run: npm run build
         env:
           NEXT_PUBLIC_API_URL: ${{ env.API_URL }}
-      
+
       - name: Deploy to Vercel (if configured)
         uses: amondnet/vercel-action@v25
         with:
@@ -219,4 +224,3 @@ jobs:
           working-directory: ./web
           scope: ${{ secrets.VERCEL_ORG_ID }}
         continue-on-error: true
-
