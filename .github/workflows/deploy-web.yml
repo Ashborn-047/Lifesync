@@ -27,24 +27,55 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Determine package manager
+        id: detect
+        run: |
+          cd web
+          if [ -f "package-lock.json" ]; then
+            echo "manager=npm" >> $GITHUB_OUTPUT
+          elif [ -f "yarn.lock" ]; then
+            echo "manager=yarn" >> $GITHUB_OUTPUT
+          elif [ -f "pnpm-lock.yaml" ]; then
+            echo "manager=pnpm" >> $GITHUB_OUTPUT
+          else
+            echo "No lockfile found!"
+            exit 1
+          fi
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: ${{ steps.detect.outputs.manager }}
           cache-dependency-path: web/package-lock.json
       
       - name: Install dependencies
-        run: npm ci
+        run: |
+          if [ "${{ steps.detect.outputs.manager }}" = "npm" ]; then
+            npm ci
+          elif [ "${{ steps.detect.outputs.manager }}" = "yarn" ]; then
+            yarn install --frozen-lockfile
+          else
+            pnpm install --frozen-lockfile
+          fi
       
       - name: Run linter
         run: npm run lint
         continue-on-error: true
       
+      - name: Set API URL
+        id: set-api-url
+        run: |
+          if [ -n "${{ secrets.NEXT_PUBLIC_API_URL }}" ]; then
+            echo "API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" >> $GITHUB_ENV
+          else
+            echo "API_URL=http://localhost:5174" >> $GITHUB_ENV
+          fi
+      
       - name: Build application
         run: npm run build
         env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://localhost:5174' }}
+          NEXT_PUBLIC_API_URL: ${{ env.API_URL }}
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -63,22 +94,53 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Determine package manager
+        id: detect
+        run: |
+          cd web
+          if [ -f "package-lock.json" ]; then
+            echo "manager=npm" >> $GITHUB_OUTPUT
+          elif [ -f "yarn.lock" ]; then
+            echo "manager=yarn" >> $GITHUB_OUTPUT
+          elif [ -f "pnpm-lock.yaml" ]; then
+            echo "manager=pnpm" >> $GITHUB_OUTPUT
+          else
+            echo "No lockfile found!"
+            exit 1
+          fi
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: ${{ steps.detect.outputs.manager }}
           cache-dependency-path: web/package-lock.json
       
       - name: Install dependencies
         working-directory: ./web
-        run: npm ci
+        run: |
+          if [ "${{ steps.detect.outputs.manager }}" = "npm" ]; then
+            npm ci
+          elif [ "${{ steps.detect.outputs.manager }}" = "yarn" ]; then
+            yarn install --frozen-lockfile
+          else
+            pnpm install --frozen-lockfile
+          fi
+      
+      - name: Set API URL
+        id: set-api-url
+        run: |
+          if [ -n "${{ secrets.NEXT_PUBLIC_API_URL }}" ]; then
+            echo "API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" >> $GITHUB_ENV
+          else
+            echo "API_URL=http://localhost:5174" >> $GITHUB_ENV
+          fi
       
       - name: Build for preview
         working-directory: ./web
         run: npm run build
         env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://localhost:5174' }}
+          NEXT_PUBLIC_API_URL: ${{ env.API_URL }}
       
       - name: Comment PR with preview info
         uses: actions/github-script@v7
@@ -101,30 +163,61 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Determine package manager
+        id: detect
+        run: |
+          cd web
+          if [ -f "package-lock.json" ]; then
+            echo "manager=npm" >> $GITHUB_OUTPUT
+          elif [ -f "yarn.lock" ]; then
+            echo "manager=yarn" >> $GITHUB_OUTPUT
+          elif [ -f "pnpm-lock.yaml" ]; then
+            echo "manager=pnpm" >> $GITHUB_OUTPUT
+          else
+            echo "No lockfile found!"
+            exit 1
+          fi
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+          cache: ${{ steps.detect.outputs.manager }}
           cache-dependency-path: web/package-lock.json
       
       - name: Install dependencies
         working-directory: ./web
-        run: npm ci
+        run: |
+          if [ "${{ steps.detect.outputs.manager }}" = "npm" ]; then
+            npm ci
+          elif [ "${{ steps.detect.outputs.manager }}" = "yarn" ]; then
+            yarn install --frozen-lockfile
+          else
+            pnpm install --frozen-lockfile
+          fi
+      
+      - name: Set API URL
+        id: set-api-url
+        run: |
+          if [ -n "${{ secrets.NEXT_PUBLIC_API_URL }}" ]; then
+            echo "API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" >> $GITHUB_ENV
+          else
+            echo "API_URL=http://localhost:5174" >> $GITHUB_ENV
+          fi
       
       - name: Build for production
         working-directory: ./web
         run: npm run build
         env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_API_URL: ${{ env.API_URL }}
       
       - name: Deploy to Vercel (if configured)
         uses: amondnet/vercel-action@v25
-        if: ${{ secrets.VERCEL_TOKEN }}
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           working-directory: ./web
           scope: ${{ secrets.VERCEL_ORG_ID }}
+        continue-on-error: true
 

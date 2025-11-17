@@ -1,0 +1,11 @@
+{
+  "name": "lifesync",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LifeSync monorepo",
+  "workspaces": [
+    "web",
+    "mobile"
+  ]
+}
+

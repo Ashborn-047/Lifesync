@@ -57,8 +57,8 @@ export async function track(
 /**
  * Track quiz started
  */
-export function trackQuizStarted(): void {
-  track("quiz_started", {
+export async function trackQuizStarted(): Promise<void> {
+  await track("quiz_started", {
     timestamp: new Date().toISOString(),
   });
 }
@@ -66,8 +66,8 @@ export function trackQuizStarted(): void {
 /**
  * Track quiz completed
  */
-export function trackQuizCompleted(assessmentId: string): void {
-  track("quiz_completed", {
+export async function trackQuizCompleted(assessmentId: string): Promise<void> {
+  await track("quiz_completed", {
     assessment_id: assessmentId,
     timestamp: new Date().toISOString(),
   });
@@ -76,8 +76,8 @@ export function trackQuizCompleted(assessmentId: string): void {
 /**
  * Track result viewed
  */
-export function trackResultViewed(assessmentId: string): void {
-  track("result_viewed", {
+export async function trackResultViewed(assessmentId: string): Promise<void> {
+  await track("result_viewed", {
     assessment_id: assessmentId,
     timestamp: new Date().toISOString(),
   });
@@ -86,8 +86,8 @@ export function trackResultViewed(assessmentId: string): void {
 /**
  * Track PDF downloaded
  */
-export function trackPDFDownloaded(assessmentId: string): void {
-  track("pdf_downloaded", {
+export async function trackPDFDownloaded(assessmentId: string): Promise<void> {
+  await track("pdf_downloaded", {
     assessment_id: assessmentId,
     timestamp: new Date().toISOString(),
   });
@@ -96,11 +96,10 @@ export function trackPDFDownloaded(assessmentId: string): void {
 /**
  * Track result shared
  */
-export function trackResultShared(assessmentId: string, shareId: string): void {
-  track("result_shared", {
+export async function trackResultShared(assessmentId: string, shareId: string): Promise<void> {
+  await track("result_shared", {
     assessment_id: assessmentId,
     share_id: shareId,
     timestamp: new Date().toISOString(),
   });
 }
-
