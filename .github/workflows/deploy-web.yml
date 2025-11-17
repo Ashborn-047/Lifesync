@@ -30,12 +30,11 @@ jobs:
       - name: Determine package manager
         id: detect
         run: |
-          cd web
-          if [ -f "package-lock.json" ]; then
+          if [ -f "./web/package-lock.json" ]; then
             echo "manager=npm" >> $GITHUB_OUTPUT
-          elif [ -f "yarn.lock" ]; then
+          elif [ -f "./web/yarn.lock" ]; then
             echo "manager=yarn" >> $GITHUB_OUTPUT
-          elif [ -f "pnpm-lock.yaml" ]; then
+          elif [ -f "./web/pnpm-lock.yaml" ]; then
             echo "manager=pnpm" >> $GITHUB_OUTPUT
           else
             echo "No lockfile found!"
@@ -47,9 +46,10 @@ jobs:
         with:
           node-version: '18'
           cache: ${{ steps.detect.outputs.manager }}
-          cache-dependency-path: web/package-lock.json
+          cache-dependency-path: ./web/package-lock.json
       
       - name: Install dependencies
+        working-directory: ./web
         run: |
           if [ "${{ steps.detect.outputs.manager }}" = "npm" ]; then
             npm ci
@@ -73,6 +73,7 @@ jobs:
           fi
       
       - name: Build application
+        working-directory: ./web
         run: npm run build
         env:
           NEXT_PUBLIC_API_URL: ${{ env.API_URL }}
@@ -97,12 +98,11 @@ jobs:
       - name: Determine package manager
         id: detect
         run: |
-          cd web
-          if [ -f "package-lock.json" ]; then
+          if [ -f "./web/package-lock.json" ]; then
             echo "manager=npm" >> $GITHUB_OUTPUT
-          elif [ -f "yarn.lock" ]; then
+          elif [ -f "./web/yarn.lock" ]; then
             echo "manager=yarn" >> $GITHUB_OUTPUT
-          elif [ -f "pnpm-lock.yaml" ]; then
+          elif [ -f "./web/pnpm-lock.yaml" ]; then
             echo "manager=pnpm" >> $GITHUB_OUTPUT
           else
             echo "No lockfile found!"
@@ -114,7 +114,7 @@ jobs:
         with:
           node-version: '18'
           cache: ${{ steps.detect.outputs.manager }}
-          cache-dependency-path: web/package-lock.json
+          cache-dependency-path: ./web/package-lock.json
       
       - name: Install dependencies
         working-directory: ./web
@@ -166,12 +166,11 @@ jobs:
       - name: Determine package manager
         id: detect
         run: |
-          cd web
-          if [ -f "package-lock.json" ]; then
+          if [ -f "./web/package-lock.json" ]; then
             echo "manager=npm" >> $GITHUB_OUTPUT
-          elif [ -f "yarn.lock" ]; then
+          elif [ -f "./web/yarn.lock" ]; then
             echo "manager=yarn" >> $GITHUB_OUTPUT
-          elif [ -f "pnpm-lock.yaml" ]; then
+          elif [ -f "./web/pnpm-lock.yaml" ]; then
             echo "manager=pnpm" >> $GITHUB_OUTPUT
           else
             echo "No lockfile found!"
@@ -183,7 +182,7 @@ jobs:
         with:
           node-version: '18'
           cache: ${{ steps.detect.outputs.manager }}
-          cache-dependency-path: web/package-lock.json
+          cache-dependency-path: ./web/package-lock.json
       
       - name: Install dependencies
         working-directory: ./web
