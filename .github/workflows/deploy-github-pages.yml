@@ -59,7 +59,8 @@ jobs:
       - name: Build application
         run: npm run build
         env:
-          NEXT_PUBLIC_API_URL: ${{ env.API_URL }}
+    BUILD_TARGET: github-pages
+    NEXT_PUBLIC_API_URL: ${{ env.API_URL }}
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
