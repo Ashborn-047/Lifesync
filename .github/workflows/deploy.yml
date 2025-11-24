@@ -5,7 +5,7 @@ on:
     branches: [ main ]
     paths:
       - "web/**"
-      - ".github/workflows/deploy-github-pages.yml"
+      - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 permissions:
@@ -21,18 +21,13 @@ jobs:
   build:
     name: Build Web App
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # Safety guard — prevents root-level builds
-      - name: Ensure Next.js app exists inside /web
-        run: |
-          if [ ! -d "web/app" ]; then
-            echo "❌ ERROR: No Next.js app found inside /web!"
-            exit 1
-          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -42,24 +37,16 @@ jobs:
           cache-dependency-path: ./web/package-lock.json
 
       - name: Install dependencies
-        working-directory: ./web
-        run: npm install
-
-      - name: Lint (non-blocking)
-        working-directory: ./web
-        run: npm run lint || true
+        run: npm ci
 
       - name: Set API URL
         run: |
-          echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL || 'http://localhost:5174' }}" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL || 'https://lifesync-hzx1.onrender.com' }}" >> $GITHUB_ENV
 
-      - name: Build Next.js (static export)
-        working-directory: ./web
+      - name: Build Next.js
         run: npm run build
         env:
           NEXT_PUBLIC_API_URL: ${{ env.NEXT_PUBLIC_API_URL }}
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
 
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
