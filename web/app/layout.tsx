@@ -48,10 +48,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/favicon.ico" />
-      </head>
+
       <body className={inter.className}>
         <ToastProvider>
           <div className="min-h-screen flex flex-col">

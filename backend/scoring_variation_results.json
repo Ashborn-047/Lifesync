@@ -1,0 +1,152 @@
+[
+  {
+    "assessment_id": "6725c5d8-50ec-4fac-9100-183b427d4cb0",
+    "mbti": "ISFJ",
+    "traits": {
+      "Openness": 0.292,
+      "Conscientiousness": 0.583,
+      "Extraversion": 0.417,
+      "Agreeableness": 0.75,
+      "Neuroticism": 0.542
+    },
+    "summary_length": 53,
+    "strengths_count": 4,
+    "challenges_count": 2,
+    "summary_preview": "You're a grounded person who values harmony and practicality. You're generally even-keeled, but not ..."
+  },
+  {
+    "assessment_id": "37531a75-4617-4ae2-9a38-be6f8cd384c5",
+    "mbti": "ESFP",
+    "traits": {
+      "Openness": 0.5,
+      "Conscientiousness": 0.292,
+      "Extraversion": 0.625,
+      "Agreeableness": 0.542,
+      "Neuroticism": 0.542
+    },
+    "summary_length": 58,
+    "strengths_count": 4,
+    "challenges_count": 2,
+    "summary_preview": "You're chill and open to new experiences, bouncing between ideas with ease. Social settings energize..."
+  },
+  {
+    "assessment_id": "ff7f1973-065d-4c34-88db-7b7837e35036",
+    "mbti": "ISFP",
+    "traits": {
+      "Openness": 0.417,
+      "Conscientiousness": 0.417,
+      "Extraversion": 0.292,
+      "Agreeableness": 0.542,
+      "Neuroticism": 0.667
+    },
+    "summary_length": 43,
+    "strengths_count": 4,
+    "challenges_count": 2,
+    "summary_preview": "You're a deep thinker, often lost in your own world. Your strong sense of order and altruism drives ..."
+  },
+  {
+    "assessment_id": "decf5953-211e-4392-8454-e5992a1c60ad",
+    "mbti": "ENFP",
+    "traits": {
+      "Openness": 0.583,
+      "Conscientiousness": 0.292,
+      "Extraversion": 0.5,
+      "Agreeableness": 0.667,
+      "Neuroticism": 0.458
+    },
+    "summary_length": 57,
+    "strengths_count": 4,
+    "challenges_count": 2,
+    "summary_preview": "You're a genuinely kind soul, radiating warmth and empathy. Your high agreeableness makes you a natu..."
+  },
+  {
+    "assessment_id": "1ba055e2-ca56-4e61-859f-8d26672f3b33",
+    "mbti": "ISFJ",
+    "traits": {
+      "Openness": 0.25,
+      "Conscientiousness": 0.542,
+      "Extraversion": 0.458,
+      "Agreeableness": 0.542,
+      "Neuroticism": 0.333
+    },
+    "summary_length": 58,
+    "strengths_count": 4,
+    "challenges_count": 2,
+    "summary_preview": "You're grounded, practical, and handle life's bumps pretty well. You value directness, but can somet..."
+  },
+  {
+    "assessment_id": "3da8c426-0ac3-43a8-91a0-fa65c9834f41",
+    "mbti": "ENFJ",
+    "traits": {
+      "Openness": 0.625,
+      "Conscientiousness": 0.542,
+      "Extraversion": 0.625,
+      "Agreeableness": 0.5,
+      "Neuroticism": 0.833
+    },
+    "summary_length": 67,
+    "strengths_count": 5,
+    "challenges_count": 3,
+    "summary_preview": "You're open to new experiences and generally outgoing, which makes you approachable. You strive to b..."
+  },
+  {
+    "assessment_id": "17d2f0f5-a2f0-4601-b004-f152e6a504ff",
+    "mbti": "ENTP",
+    "traits": {
+      "Openness": 0.583,
+      "Conscientiousness": 0.417,
+      "Extraversion": 0.5,
+      "Agreeableness": 0.375,
+      "Neuroticism": 0.292
+    },
+    "summary_length": 56,
+    "strengths_count": 5,
+    "challenges_count": 2,
+    "summary_preview": "You're grounded and emotionally steady, bouncing back from tough times like a pro. You've got a curi..."
+  },
+  {
+    "assessment_id": "ce16bb7d-2963-49ed-8e64-9fce7338c21c",
+    "mbti": "ESFJ",
+    "traits": {
+      "Openness": 0.417,
+      "Conscientiousness": 0.667,
+      "Extraversion": 0.5,
+      "Agreeableness": 0.583,
+      "Neuroticism": 0.708
+    },
+    "summary_length": 68,
+    "strengths_count": 4,
+    "challenges_count": 3,
+    "summary_preview": "You're a highly organized individual with a strong drive to achieve your goals. Your trustworthiness..."
+  },
+  {
+    "assessment_id": "cf4886b5-23e5-4eb2-b857-365cd070ff68",
+    "mbti": "ESFJ",
+    "traits": {
+      "Openness": 0.5,
+      "Conscientiousness": 0.625,
+      "Extraversion": 0.625,
+      "Agreeableness": 0.583,
+      "Neuroticism": 0.417
+    },
+    "summary_length": 48,
+    "strengths_count": 4,
+    "challenges_count": 2,
+    "summary_preview": "You're grounded and pretty chill, rocking a good balance in life. Open to new stuff but not reckless..."
+  },
+  {
+    "assessment_id": "9febfc79-3755-4376-baee-3cac581edc0a",
+    "mbti": "ESFP",
+    "traits": {
+      "Openness": 0.5,
+      "Conscientiousness": 0.292,
+      "Extraversion": 0.75,
+      "Agreeableness": 0.708,
+      "Neuroticism": 0.417
+    },
+    "summary_length": 65,
+    "strengths_count": 4,
+    "challenges_count": 2,
+    "summary_preview": "You're the life of the party, radiating positive vibes and connecting easily with others. Your high ..."
+  }
+]

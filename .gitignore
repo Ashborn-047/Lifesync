@@ -20,6 +20,7 @@ ios/
 
 # Build artifacts
 .next/
+out/
 dist/
 build/
 

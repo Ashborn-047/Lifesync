@@ -22,7 +22,7 @@ const nextConfig = {
     return config;
   },
   // Optional: Set base path if deploying to a subdirectory
-  // basePath: process.env.NODE_ENV === 'production' ? '/Lifesync' : '',
+  basePath: process.env.NODE_ENV === 'production' ? '/Lifesync' : '',
   // trailingSlash: true,
 };
 

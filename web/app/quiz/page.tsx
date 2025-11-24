@@ -34,7 +34,7 @@ export default function QuizPage() {
       // Check if saved questions match current questions (by IDs)
       const savedIds = new Set(savedProgress.questions.map((q) => q.id));
       const currentIds = new Set(questions.map((q) => q.id));
-      const idsMatch = 
+      const idsMatch =
         savedIds.size === currentIds.size &&
         Array.from(savedIds).every((id) => currentIds.has(id));
 
@@ -141,20 +141,16 @@ export default function QuizPage() {
             <h2 className="text-h3 text-red-400 mb-4">Network Error</h2>
             <p className="text-body text-white/70 mb-4">{error}</p>
             <div className="text-sm text-white/50 mb-6 space-y-2">
-              <p>Make sure the backend server is running:</p>
-              <code className="block bg-white/5 p-2 rounded text-xs">
-                cd backend<br />
-                python -m uvicorn src.api.server:app --reload --port 5174
-              </code>
+              <p>Make sure the backend server is running and accessible.</p>
               <p className="text-xs mt-4">
-                Then verify it&apos;s accessible at{" "}
+                Checking connection to:{" "}
                 <a
-                  href="http://localhost:5174/health"
+                  href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5174'}/health`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-purple-400 hover:underline"
                 >
-                  http://localhost:5174/health
+                  {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5174'}/health
                 </a>
               </p>
             </div>
