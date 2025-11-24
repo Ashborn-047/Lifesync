@@ -22,10 +22,6 @@ jobs:
     name: Build Web App
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./web
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -33,7 +29,7 @@ jobs:
       # Safety guard — prevents root-level builds
       - name: Ensure Next.js app exists inside /web
         run: |
-          if [ ! -d "app" ]; then
+          if [ ! -d "web/app" ]; then
             echo "❌ ERROR: No Next.js app found inside /web!"
             exit 1
           fi
@@ -47,7 +43,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./web
-        run: npm ci
+        run: npm install
 
       - name: Lint (non-blocking)
         working-directory: ./web
