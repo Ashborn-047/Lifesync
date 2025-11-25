@@ -22,7 +22,7 @@ The official web version of the LifeSync platform - your personalized life optim
 ### Prerequisites
 
 - Node.js 18+ installed
-- Backend API running on `http://localhost:5174`
+- Backend API running (deployed on Railway)
 
 ### Installation
 
