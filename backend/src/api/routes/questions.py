@@ -102,13 +102,17 @@ def _get_balanced_question_ids(limit: int = 30) -> List[str]:
             with open(smart_quiz_file, 'r', encoding='utf-8') as f:
                 smart_quiz = json.load(f)
             question_ids = smart_quiz.get("question_ids", [])
-            if len(question_ids) >= limit:
-                logger.info(f"Using balanced question set from smart_quiz_30.json ({limit} questions)")
+            
+            # Strict check: if we want 30, and we have 30, return them ALL.
+            # If we have more, slice. If we have fewer, log warning.
+            if len(question_ids) > 0:
+                logger.info(f"Loaded {len(question_ids)} IDs from smart_quiz_30.json")
                 return question_ids[:limit]
         except Exception as e:
             logger.warning(f"Failed to load smart_quiz_30.json: {e}")
     
     # Fallback: return first N question IDs (not balanced, but works)
+    logger.warning("Smart quiz file not found or failed to load. Falling back to default order.")
     all_questions = _load_questions()
     return [q.get('id', '') for q in all_questions[:limit] if q.get('id')]
 
@@ -132,19 +136,35 @@ async def get_questions(limit: Optional[int] = Query(None, description="Limit nu
         
         # If limit is specified, use balanced question set (ensures all traits are covered)
         if limit and limit > 0:
-            # Get balanced question IDs from smart_quiz_30.json
-            balanced_ids = _get_balanced_question_ids(limit)
+            # SPECIAL CASE: If limit is 30, we MUST use the smart_quiz_30.json set
+            if limit == 30:
+                logger.info("Request for Smart Quiz (limit=30) detected. Enforcing smart_quiz_30.json.")
+                balanced_ids = _get_balanced_question_ids(30)
+            else:
+                balanced_ids = _get_balanced_question_ids(limit)
             
             # Create a lookup for fast access
             questions_dict = {q.get('id'): q for q in all_questions}
             
             # Get questions in the balanced order
-            questions = [questions_dict.get(q_id) for q_id in balanced_ids if questions_dict.get(q_id)]
+            questions = []
+            missing_ids = []
+            for q_id in balanced_ids:
+                q = questions_dict.get(q_id)
+                if q:
+                    questions.append(q)
+                else:
+                    missing_ids.append(q_id)
             
-            # If balanced set failed, fall back to first N (not ideal, but works)
+            if missing_ids:
+                logger.warning(f"Missing question IDs from balanced set: {missing_ids}")
+
+            # If balanced set failed, fall back
             if len(questions) < limit:
-                logger.warning(f"Balanced set incomplete ({len(questions)}/{limit}), using first {limit} questions")
+                logger.warning(f"Balanced set incomplete ({len(questions)}/{limit}). Falling back to first {limit} questions.")
                 questions = all_questions[:limit]
+            else:
+                logger.info(f"Successfully loaded balanced set of {len(questions)} questions.")
         else:
             questions = all_questions
         
