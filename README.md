@@ -147,9 +147,22 @@ To deploy the backend API for production:
    - Configure environment variables (Supabase, API keys)
    - Auto-deploys on every push
 
-2. **Other Options**:
    - Railway, Heroku, DigitalOcean, AWS, etc.
    - See backend [README.md](./backend/README.md) for details
+
+### Backend Automation (Health Checks)
+
+The system includes automated health monitoring to ensure database connectivity and API responsiveness:
+
+1. **Daily Auto-Healing**:
+   - A GitHub Action (`.github/workflows/supabase-health-check.yml`) runs every 24 hours at 00:00 UTC.
+   - It executes `backend/scripts/supabase_health_check.py` to ping the Supabase database.
+   - If successful, it prevents database pausing (for free tier projects).
+
+2. **Discord Notifications**:
+   - Health status reports are sent to a private Discord channel.
+   - Reports include: `Status`, `Latency`, `Total Assessments`, and `Recent Activity`.
+   - Setup: Add `DISCORD_WEBHOOK_URL` to GitHub Secrets and local `.env`.
 
 ### Web Deployment
 
