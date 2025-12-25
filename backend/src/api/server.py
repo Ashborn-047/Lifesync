@@ -108,6 +108,7 @@ class AssessmentResponse(BaseModel):
     top_facets: list
     coverage: float
     responses_count: int
+    is_complete: bool = True
 
 
 class ExplanationRequest(BaseModel):
@@ -289,7 +290,8 @@ def create_assessment(
             dominant=scores["dominant"],
             top_facets=scores["top_facets"],
             coverage=scores["coverage"],
-            responses_count=scores["responses_count"]
+            responses_count=scores["responses_count"],
+            is_complete=scores.get("has_complete_profile", True)
         )
         
     except ValueError as e:
@@ -376,7 +378,8 @@ def get_assessment(
             dominant=dominant,
             top_facets=top_facets,
             coverage=100.0,  # We don't store this, assume 100%
-            responses_count=30  # We don't store this, assume 30 for quick quiz
+            responses_count=30,  # We don't store this, assume 30 for quick quiz
+            is_complete=len(traits) == 5
         )
         
     except HTTPException:

@@ -98,6 +98,7 @@ class PersonalityScorer:
         traits_with_data = []
         
         for trait_code in ['O', 'C', 'E', 'A', 'N']:
+            print(f"DEBUG: Trait {trait_code} - Sum: {trait_sums[trait_code]}, Weight: {trait_weights[trait_code]}")
             question_count = trait_weights.get(trait_code, 0)
             
             if question_count >= self.MIN_QUESTIONS_PER_TRAIT:

@@ -1,0 +1,12 @@
+{
+    "smart30": {
+        "reverseCoded": false,
+        "source": "canonical_package",
+        "description": "30-question subset for quick assessment"
+    },
+    "full180": {
+        "reverseCoded": true,
+        "source": "canonical_package",
+        "description": "Full 180-question assessment"
+    }
+}

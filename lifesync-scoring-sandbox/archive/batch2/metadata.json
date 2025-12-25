@@ -1,0 +1,35 @@
+{
+    "timestamp": "2025-11-30T09:15:59.220Z",
+    "seed": 1337,
+    "runsPerScenario": 5000,
+    "engineVersions": {
+        "python": "3.10.14-slim",
+        "node": "20.10.0"
+    },
+    "config": {
+        "batchSize": 200,
+        "concurrency": 8,
+        "sleepBetweenBatchesMs": 300,
+        "requestTimeoutMs": 15000,
+        "maxRetries": 3,
+        "retryBackoff": [
+            300,
+            700,
+            1500
+        ],
+        "failFast": {
+            "maxMismatchesInitial": 25,
+            "initialRunCount": 500,
+            "maxEngineErrors": 3
+        },
+        "engines": {
+            "python": "http://python-engine:8000/compute",
+            "ts": "http://ts-engine:7000/compute"
+        },
+        "paths": {
+            "questions": "/app/engines/ts-engine/questions.json",
+            "base": "/app/archive/batch2",
+            "logs": "/app/archive/batch2/logs"
+        }
+    }
+}

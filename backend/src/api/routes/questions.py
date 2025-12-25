@@ -95,7 +95,7 @@ def _get_balanced_question_ids(limit: int = 30) -> List[str]:
     This ensures all 5 traits are covered evenly.
     """
     backend_dir = Path(__file__).parent.parent.parent.parent
-    smart_quiz_file = backend_dir / "data" / "question_bank" / "smart_quiz_30.json"
+    smart_quiz_file = backend_dir / "data" / "question_bank" / "smart_30.json"
     
     if smart_quiz_file.exists():
         try:

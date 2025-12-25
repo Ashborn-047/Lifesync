@@ -121,7 +121,8 @@ class LLMProviderBase(ABC):
         confidence: Dict[str, Any],
         dominant: Dict[str, str],
         system_prompt: Optional[str] = None,
-        tone_profile: Optional[Dict[str, Any]] = None
+        tone_profile: Optional[Dict[str, Any]] = None,
+        persona: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Generate personality explanation.
@@ -133,6 +134,7 @@ class LLMProviderBase(ABC):
             dominant: Dominant profile information
             system_prompt: Optional custom system prompt
             tone_profile: Optional tone profile for communication style
+            persona: Optional persona object
         
         Returns:
             Dictionary with explanation data
@@ -141,7 +143,7 @@ class LLMProviderBase(ABC):
         
         system_prompt = system_prompt or SYSTEM_PROMPT
         user_prompt = get_personality_explanation_prompt(
-            traits, facets, confidence, dominant, tone_profile=tone_profile
+            traits, facets, confidence, dominant, tone_profile=tone_profile, persona=persona
         )
         
         start_time = time.time()

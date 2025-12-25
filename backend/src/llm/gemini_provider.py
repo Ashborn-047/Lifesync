@@ -193,7 +193,8 @@ class GeminiProvider(LLMProviderBase):
         confidence: dict,
         dominant: dict,
         system_prompt: Optional[str] = None,
-        tone_profile: Optional[dict] = None
+        tone_profile: Optional[dict] = None,
+        persona: Optional[dict] = None
     ) -> dict:
         """
         Generate explanation with proper error handling and safe JSON parsing.
@@ -204,7 +205,7 @@ class GeminiProvider(LLMProviderBase):
         
         system_prompt = system_prompt or SYSTEM_PROMPT
         user_prompt = get_personality_explanation_prompt(
-            traits, facets, confidence, dominant, tone_profile=tone_profile
+            traits, facets, confidence, dominant, tone_profile=tone_profile, persona=persona
         )
         
         start_time = time.time()

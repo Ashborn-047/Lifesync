@@ -69,7 +69,7 @@ class TestScorerValidation:
         logger.info("✅ Test passed: Unbalanced questions correctly detected")
     
     def test_balanced_questions_pass_validation(self, scorer):
-        """Should pass validation with balanced questions from smart_quiz_30.json"""
+        """Should pass validation with balanced questions from smart_30.json"""
         logger.info("=" * 60)
         logger.info("TEST: Balanced questions validation")
         logger.info("=" * 60)

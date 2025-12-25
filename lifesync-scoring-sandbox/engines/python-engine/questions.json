@@ -1,0 +1,1513 @@
+{
+    "version": "1.0.0",
+    "name": "LifeSync Personality Assessment",
+    "description": "180-question OCEAN personality assessment with 30 facets",
+    "scale": {
+        "min": 1,
+        "max": 5,
+        "type": "likert",
+        "labels": {
+            "1": "Strongly Disagree",
+            "2": "Disagree",
+            "3": "Neutral",
+            "4": "Agree",
+            "5": "Strongly Agree"
+        }
+    },
+    "traits": {
+        "O": {
+            "name": "Openness",
+            "description": "Imagination, curiosity, and openness to new experiences"
+        },
+        "C": {
+            "name": "Conscientiousness",
+            "description": "Organization, responsibility, and self-discipline"
+        },
+        "E": {
+            "name": "Extraversion",
+            "description": "Sociability, assertiveness, and energy level"
+        },
+        "A": {
+            "name": "Agreeableness",
+            "description": "Compassion, cooperation, and trust in others"
+        },
+        "N": {
+            "name": "Neuroticism",
+            "description": "Emotional sensitivity and stress reactivity"
+        }
+    },
+    "facets": {
+        "O1": "Fantasy",
+        "O2": "Aesthetics",
+        "O3": "Feelings",
+        "O4": "Actions",
+        "O5": "Ideas",
+        "O6": "Values",
+        "C1": "Competence",
+        "C2": "Order",
+        "C3": "Dutifulness",
+        "C4": "Achievement",
+        "C5": "Self-Discipline",
+        "C6": "Deliberation",
+        "E1": "Warmth",
+        "E2": "Gregariousness",
+        "E3": "Assertiveness",
+        "E4": "Activity",
+        "E5": "Excitement-Seeking",
+        "E6": "Positive-Emotions",
+        "A1": "Trust",
+        "A2": "Straightforwardness",
+        "A3": "Altruism",
+        "A4": "Compliance",
+        "A5": "Modesty",
+        "A6": "Tender-Mindedness",
+        "N1": "Anxiety",
+        "N2": "Angry-Hostility",
+        "N3": "Depression",
+        "N4": "Self-Consciousness",
+        "N5": "Impulsiveness",
+        "N6": "Vulnerability"
+    },
+    "questions": [
+        {
+            "id": "Q001",
+            "text": "I often imagine creative scenarios in my mind",
+            "trait": "O",
+            "facet": "O1",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q002",
+            "text": "I rarely daydream about unlikely possibilities",
+            "trait": "O",
+            "facet": "O1",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q003",
+            "text": "I enjoy thinking about imaginative ideas",
+            "trait": "O",
+            "facet": "O1",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q004",
+            "text": "I prefer to focus on reality rather than imagination",
+            "trait": "O",
+            "facet": "O1",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q005",
+            "text": "I like creating mental pictures of new situations",
+            "trait": "O",
+            "facet": "O1",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q006",
+            "text": "I find daydreaming to be pointless",
+            "trait": "O",
+            "facet": "O1",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q007",
+            "text": "I appreciate beauty in art and nature",
+            "trait": "O",
+            "facet": "O2",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q008",
+            "text": "I don't understand why people care about art",
+            "trait": "O",
+            "facet": "O2",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q009",
+            "text": "I notice aesthetic details that others miss",
+            "trait": "O",
+            "facet": "O2",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q010",
+            "text": "I rarely pay attention to visual design",
+            "trait": "O",
+            "facet": "O2",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q011",
+            "text": "I enjoy spending time in beautiful places",
+            "trait": "O",
+            "facet": "O2",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q012",
+            "text": "Artistic experiences don't move me emotionally",
+            "trait": "O",
+            "facet": "O2",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q013",
+            "text": "I enjoy exploring my own emotions deeply",
+            "trait": "O",
+            "facet": "O3",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q014",
+            "text": "I don't spend much time analyzing my feelings",
+            "trait": "O",
+            "facet": "O3",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q015",
+            "text": "I experience emotions more intensely than most",
+            "trait": "O",
+            "facet": "O3",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q016",
+            "text": "I prefer to keep emotions simple and practical",
+            "trait": "O",
+            "facet": "O3",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q017",
+            "text": "I value emotional depth in conversations",
+            "trait": "O",
+            "facet": "O3",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q018",
+            "text": "I rarely get caught up in emotional moments",
+            "trait": "O",
+            "facet": "O3",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q019",
+            "text": "I like trying new foods and experiences",
+            "trait": "O",
+            "facet": "O4",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q020",
+            "text": "I prefer sticking to familiar routines",
+            "trait": "O",
+            "facet": "O4",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q021",
+            "text": "I actively seek out novel activities",
+            "trait": "O",
+            "facet": "O4",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q022",
+            "text": "I avoid trying things that are unfamiliar",
+            "trait": "O",
+            "facet": "O4",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q023",
+            "text": "I enjoy traveling to places I've never been",
+            "trait": "O",
+            "facet": "O4",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q024",
+            "text": "I find comfort in doing the same things regularly",
+            "trait": "O",
+            "facet": "O4",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q025",
+            "text": "I enjoy learning new concepts just for curiosity",
+            "trait": "O",
+            "facet": "O5",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q026",
+            "text": "I don't see the point in learning impractical ideas",
+            "trait": "O",
+            "facet": "O5",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q027",
+            "text": "I like discussing philosophical questions",
+            "trait": "O",
+            "facet": "O5",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q028",
+            "text": "I prefer practical topics over abstract theories",
+            "trait": "O",
+            "facet": "O5",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q029",
+            "text": "I enjoy solving complex mental puzzles",
+            "trait": "O",
+            "facet": "O5",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q030",
+            "text": "I find theoretical discussions boring",
+            "trait": "O",
+            "facet": "O5",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q031",
+            "text": "I question my personal values and beliefs",
+            "trait": "O",
+            "facet": "O6",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q032",
+            "text": "I rarely reconsider my core beliefs",
+            "trait": "O",
+            "facet": "O6",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q033",
+            "text": "I'm open to changing my opinions with new evidence",
+            "trait": "O",
+            "facet": "O6",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q034",
+            "text": "I stick to traditional values most of the time",
+            "trait": "O",
+            "facet": "O6",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q035",
+            "text": "I enjoy debating different viewpoints on ethics",
+            "trait": "O",
+            "facet": "O6",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q036",
+            "text": "I prefer not to question established norms",
+            "trait": "O",
+            "facet": "O6",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q037",
+            "text": "I feel confident in my ability to handle tasks",
+            "trait": "C",
+            "facet": "C1",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q038",
+            "text": "I often doubt whether I can complete things well",
+            "trait": "C",
+            "facet": "C1",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q039",
+            "text": "I trust my skills when facing challenges",
+            "trait": "C",
+            "facet": "C1",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q040",
+            "text": "I worry that I'm not capable enough",
+            "trait": "C",
+            "facet": "C1",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q041",
+            "text": "I believe I can learn what I need to succeed",
+            "trait": "C",
+            "facet": "C1",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q042",
+            "text": "I feel unprepared for most responsibilities",
+            "trait": "C",
+            "facet": "C1",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q043",
+            "text": "I keep my space organized and tidy",
+            "trait": "C",
+            "facet": "C2",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q044",
+            "text": "I often leave things messy and scattered",
+            "trait": "C",
+            "facet": "C2",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q045",
+            "text": "I enjoy having everything in its proper place",
+            "trait": "C",
+            "facet": "C2",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q046",
+            "text": "I don't mind if my surroundings are disorganized",
+            "trait": "C",
+            "facet": "C2",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q047",
+            "text": "I make sure my belongings are well-arranged",
+            "trait": "C",
+            "facet": "C2",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q048",
+            "text": "I rarely organize my personal space",
+            "trait": "C",
+            "facet": "C2",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q049",
+            "text": "I take my responsibilities very seriously",
+            "trait": "C",
+            "facet": "C3",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q050",
+            "text": "I sometimes skip obligations when inconvenient",
+            "trait": "C",
+            "facet": "C3",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q051",
+            "text": "I always try to do what I've promised",
+            "trait": "C",
+            "facet": "C3",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q052",
+            "text": "I don't feel too bad about breaking commitments",
+            "trait": "C",
+            "facet": "C3",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q053",
+            "text": "I follow through on my obligations consistently",
+            "trait": "C",
+            "facet": "C3",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q054",
+            "text": "I often let responsibilities slide if I'm busy",
+            "trait": "C",
+            "facet": "C3",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q055",
+            "text": "I set ambitious goals and work hard to achieve them",
+            "trait": "C",
+            "facet": "C4",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q056",
+            "text": "I don't push myself to accomplish more than necessary",
+            "trait": "C",
+            "facet": "C4",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q057",
+            "text": "I'm motivated to excel in what I do",
+            "trait": "C",
+            "facet": "C4",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q058",
+            "text": "I'm satisfied with doing just enough to get by",
+            "trait": "C",
+            "facet": "C4",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q059",
+            "text": "I strive to be the best at important tasks",
+            "trait": "C",
+            "facet": "C4",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q060",
+            "text": "I rarely aim for outstanding performance",
+            "trait": "C",
+            "facet": "C4",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q061",
+            "text": "I stick to my plans even when it's difficult",
+            "trait": "C",
+            "facet": "C5",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q062",
+            "text": "I easily get distracted from what I'm working on",
+            "trait": "C",
+            "facet": "C5",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q063",
+            "text": "I maintain focus until I finish a task",
+            "trait": "C",
+            "facet": "C5",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q064",
+            "text": "I give up on tasks when they become tedious",
+            "trait": "C",
+            "facet": "C5",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q065",
+            "text": "I push through obstacles to complete my work",
+            "trait": "C",
+            "facet": "C5",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q066",
+            "text": "I procrastinate more than I should",
+            "trait": "C",
+            "facet": "C5",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q067",
+            "text": "I think carefully before making important decisions",
+            "trait": "C",
+            "facet": "C6",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q068",
+            "text": "I often act without thinking things through",
+            "trait": "C",
+            "facet": "C6",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q069",
+            "text": "I consider consequences before taking action",
+            "trait": "C",
+            "facet": "C6",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q070",
+            "text": "I tend to rush into things impulsively",
+            "trait": "C",
+            "facet": "C6",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q071",
+            "text": "I take time to plan before starting something",
+            "trait": "C",
+            "facet": "C6",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q072",
+            "text": "I make hasty decisions that I later regret",
+            "trait": "C",
+            "facet": "C6",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q073",
+            "text": "I find it easy to connect with new people",
+            "trait": "E",
+            "facet": "E1",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q074",
+            "text": "I have trouble warming up to others quickly",
+            "trait": "E",
+            "facet": "E1",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q075",
+            "text": "I make others feel comfortable around me",
+            "trait": "E",
+            "facet": "E1",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q076",
+            "text": "I tend to keep a distance in relationships",
+            "trait": "E",
+            "facet": "E1",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q077",
+            "text": "I'm genuinely interested in other people's lives",
+            "trait": "E",
+            "facet": "E1",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q078",
+            "text": "I prefer not to get too close to people",
+            "trait": "E",
+            "facet": "E1",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q079",
+            "text": "I enjoy being around lots of people",
+            "trait": "E",
+            "facet": "E2",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q080",
+            "text": "I prefer spending time alone over socializing",
+            "trait": "E",
+            "facet": "E2",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q081",
+            "text": "I feel energized at social gatherings",
+            "trait": "E",
+            "facet": "E2",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q082",
+            "text": "Large groups make me feel drained",
+            "trait": "E",
+            "facet": "E2",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q083",
+            "text": "I like meeting new people regularly",
+            "trait": "E",
+            "facet": "E2",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q084",
+            "text": "I avoid social events when I can",
+            "trait": "E",
+            "facet": "E2",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q085",
+            "text": "I take charge when a group needs direction",
+            "trait": "E",
+            "facet": "E3",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q086",
+            "text": "I let others lead rather than stepping up",
+            "trait": "E",
+            "facet": "E3",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q087",
+            "text": "I speak up confidently in group discussions",
+            "trait": "E",
+            "facet": "E3",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q088",
+            "text": "I stay quiet even when I have opinions",
+            "trait": "E",
+            "facet": "E3",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q089",
+            "text": "I enjoy influencing others' decisions",
+            "trait": "E",
+            "facet": "E3",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q090",
+            "text": "I rarely try to persuade people",
+            "trait": "E",
+            "facet": "E3",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q091",
+            "text": "I prefer a fast-paced and busy lifestyle",
+            "trait": "E",
+            "facet": "E4",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q092",
+            "text": "I like taking things slowly and calmly",
+            "trait": "E",
+            "facet": "E4",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q093",
+            "text": "I enjoy staying active throughout the day",
+            "trait": "E",
+            "facet": "E4",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q094",
+            "text": "I prefer a relaxed and quiet daily routine",
+            "trait": "E",
+            "facet": "E4",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q095",
+            "text": "I schedule many activities to fill my time",
+            "trait": "E",
+            "facet": "E4",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q096",
+            "text": "I avoid over-scheduling myself",
+            "trait": "E",
+            "facet": "E4",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q097",
+            "text": "I seek out thrilling and adventurous experiences",
+            "trait": "E",
+            "facet": "E5",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q098",
+            "text": "I prefer safe and predictable activities",
+            "trait": "E",
+            "facet": "E5",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q099",
+            "text": "I enjoy activities that get my adrenaline going",
+            "trait": "E",
+            "facet": "E5",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q100",
+            "text": "I avoid risky or exciting situations",
+            "trait": "E",
+            "facet": "E5",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q101",
+            "text": "I look for opportunities to try daring things",
+            "trait": "E",
+            "facet": "E5",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q102",
+            "text": "I'm happiest with calm and peaceful activities",
+            "trait": "E",
+            "facet": "E5",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q103",
+            "text": "I often feel joyful and enthusiastic",
+            "trait": "E",
+            "facet": "E6",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q104",
+            "text": "I rarely experience strong positive emotions",
+            "trait": "E",
+            "facet": "E6",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q105",
+            "text": "I laugh easily and enjoy humor",
+            "trait": "E",
+            "facet": "E6",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q106",
+            "text": "I tend to stay emotionally neutral most of the time",
+            "trait": "E",
+            "facet": "E6",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q107",
+            "text": "I find reasons to be cheerful daily",
+            "trait": "E",
+            "facet": "E6",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q108",
+            "text": "I don't often feel excited about things",
+            "trait": "E",
+            "facet": "E6",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q109",
+            "text": "I believe most people have good intentions",
+            "trait": "A",
+            "facet": "A1",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q110",
+            "text": "I'm skeptical of others' motives",
+            "trait": "A",
+            "facet": "A1",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q111",
+            "text": "I give people the benefit of the doubt",
+            "trait": "A",
+            "facet": "A1",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q112",
+            "text": "I assume people will take advantage if they can",
+            "trait": "A",
+            "facet": "A1",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q113",
+            "text": "I trust strangers until proven otherwise",
+            "trait": "A",
+            "facet": "A1",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q114",
+            "text": "I'm cautious about trusting new people",
+            "trait": "A",
+            "facet": "A1",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q115",
+            "text": "I'm honest even when it's uncomfortable",
+            "trait": "A",
+            "facet": "A2",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q116",
+            "text": "I bend the truth when it's convenient",
+            "trait": "A",
+            "facet": "A2",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q117",
+            "text": "I say what I mean directly and clearly",
+            "trait": "A",
+            "facet": "A2",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q118",
+            "text": "I manipulate situations to get what I want",
+            "trait": "A",
+            "facet": "A2",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q119",
+            "text": "I value transparency in all interactions",
+            "trait": "A",
+            "facet": "A2",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q120",
+            "text": "I often say what people want to hear instead of the truth",
+            "trait": "A",
+            "facet": "A2",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q121",
+            "text": "I go out of my way to help others",
+            "trait": "A",
+            "facet": "A3",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q122",
+            "text": "I rarely offer help unless asked directly",
+            "trait": "A",
+            "facet": "A3",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q123",
+            "text": "I enjoy supporting people even when inconvenient",
+            "trait": "A",
+            "facet": "A3",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q124",
+            "text": "I focus on my own needs before others'",
+            "trait": "A",
+            "facet": "A3",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q125",
+            "text": "I find fulfillment in being generous",
+            "trait": "A",
+            "facet": "A3",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q126",
+            "text": "I avoid getting involved in others' problems",
+            "trait": "A",
+            "facet": "A3",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q127",
+            "text": "I prefer cooperation over competition",
+            "trait": "A",
+            "facet": "A4",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q128",
+            "text": "I argue when I disagree with someone",
+            "trait": "A",
+            "facet": "A4",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q129",
+            "text": "I try to maintain harmony in groups",
+            "trait": "A",
+            "facet": "A4",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q130",
+            "text": "I don't mind creating conflict to make a point",
+            "trait": "A",
+            "facet": "A4",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q131",
+            "text": "I compromise to keep the peace",
+            "trait": "A",
+            "facet": "A4",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q132",
+            "text": "I push back strongly when I think I'm right",
+            "trait": "A",
+            "facet": "A4",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q133",
+            "text": "I prefer others to receive recognition over me",
+            "trait": "A",
+            "facet": "A5",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q134",
+            "text": "I make sure people know about my accomplishments",
+            "trait": "A",
+            "facet": "A5",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q135",
+            "text": "I downplay my achievements around others",
+            "trait": "A",
+            "facet": "A5",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q136",
+            "text": "I enjoy being the center of attention",
+            "trait": "A",
+            "facet": "A5",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q137",
+            "text": "I avoid showing off even when I've done well",
+            "trait": "A",
+            "facet": "A5",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q138",
+            "text": "I think I'm better than most people at what I do",
+            "trait": "A",
+            "facet": "A5",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q139",
+            "text": "I'm deeply moved by others' difficulties",
+            "trait": "A",
+            "facet": "A6",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q140",
+            "text": "I don't get too emotional about others' problems",
+            "trait": "A",
+            "facet": "A6",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q141",
+            "text": "I feel others' pain as if it were my own",
+            "trait": "A",
+            "facet": "A6",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q142",
+            "text": "I remain detached when people share struggles",
+            "trait": "A",
+            "facet": "A6",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q143",
+            "text": "I offer comfort when someone is upset",
+            "trait": "A",
+            "facet": "A6",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q144",
+            "text": "I think people are too sensitive about things",
+            "trait": "A",
+            "facet": "A6",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q145",
+            "text": "I worry about things that might go wrong",
+            "trait": "N",
+            "facet": "N1",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q146",
+            "text": "I rarely feel anxious about the future",
+            "trait": "N",
+            "facet": "N1",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q147",
+            "text": "I get nervous before important events",
+            "trait": "N",
+            "facet": "N1",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q148",
+            "text": "I stay calm even in uncertain situations",
+            "trait": "N",
+            "facet": "N1",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q149",
+            "text": "I often replay concerns in my mind",
+            "trait": "N",
+            "facet": "N1",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q150",
+            "text": "I don't spend time worrying about possibilities",
+            "trait": "N",
+            "facet": "N1",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q151",
+            "text": "I get irritated more easily than most people",
+            "trait": "N",
+            "facet": "N2",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q152",
+            "text": "I rarely lose my temper with others",
+            "trait": "N",
+            "facet": "N2",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q153",
+            "text": "Small annoyances can ruin my mood",
+            "trait": "N",
+            "facet": "N2",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q154",
+            "text": "I stay patient even when frustrated",
+            "trait": "N",
+            "facet": "N2",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q155",
+            "text": "I hold grudges longer than I should",
+            "trait": "N",
+            "facet": "N2",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q156",
+            "text": "I forgive quickly and move on",
+            "trait": "N",
+            "facet": "N2",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q157",
+            "text": "I sometimes feel sad without a clear reason",
+            "trait": "N",
+            "facet": "N3",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q158",
+            "text": "I rarely experience prolonged low moods",
+            "trait": "N",
+            "facet": "N3",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q159",
+            "text": "I have days where everything feels difficult",
+            "trait": "N",
+            "facet": "N3",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q160",
+            "text": "I bounce back quickly from disappointments",
+            "trait": "N",
+            "facet": "N3",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q161",
+            "text": "I notice my mood drops more than others' sometimes",
+            "trait": "N",
+            "facet": "N3",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q162",
+            "text": "I maintain a positive outlook most days",
+            "trait": "N",
+            "facet": "N3",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q163",
+            "text": "I worry about what others think of me",
+            "trait": "N",
+            "facet": "N4",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q164",
+            "text": "I don't care much about others' opinions",
+            "trait": "N",
+            "facet": "N4",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q165",
+            "text": "I replay social interactions in my head",
+            "trait": "N",
+            "facet": "N4",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q166",
+            "text": "I forget about social moments quickly",
+            "trait": "N",
+            "facet": "N4",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q167",
+            "text": "I feel awkward being the center of attention",
+            "trait": "N",
+            "facet": "N4",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q168",
+            "text": "I'm comfortable in the spotlight",
+            "trait": "N",
+            "facet": "N4",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q169",
+            "text": "I sometimes act without thinking when upset",
+            "trait": "N",
+            "facet": "N5",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q170",
+            "text": "I always think before I act",
+            "trait": "N",
+            "facet": "N5",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q171",
+            "text": "I make impulsive choices I later regret",
+            "trait": "N",
+            "facet": "N5",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q172",
+            "text": "I carefully consider decisions before making them",
+            "trait": "N",
+            "facet": "N5",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q173",
+            "text": "I struggle to resist urges in the moment",
+            "trait": "N",
+            "facet": "N5",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q174",
+            "text": "I have good control over my impulses",
+            "trait": "N",
+            "facet": "N5",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q175",
+            "text": "I feel overwhelmed by stress more than others",
+            "trait": "N",
+            "facet": "N6",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q176",
+            "text": "I handle pressure well without getting flustered",
+            "trait": "N",
+            "facet": "N6",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q177",
+            "text": "Small problems can feel like major crises to me",
+            "trait": "N",
+            "facet": "N6",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q178",
+            "text": "I keep perspective even during tough times",
+            "trait": "N",
+            "facet": "N6",
+            "reverse": true,
+            "weight": 1.0
+        },
+        {
+            "id": "Q179",
+            "text": "I take longer than others to recover from setbacks",
+            "trait": "N",
+            "facet": "N6",
+            "reverse": false,
+            "weight": 1.0
+        },
+        {
+            "id": "Q180",
+            "text": "I adapt quickly when things go wrong",
+            "trait": "N",
+            "facet": "N6",
+            "reverse": true,
+            "weight": 1.0
+        }
+    ]
+}

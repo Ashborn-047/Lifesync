@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  python-engine:
+    build: ./engines/python-engine
+    container_name: python-engine
+    ports:
+      - "8000:8000"
+    command: uvicorn server:app --host 0.0.0.0 --port 8000 --reload
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 3G
+      placement:
+        constraints:
+          - cpuset=0-1
+
+  ts-engine:
+    build: ./engines/ts-engine
+    container_name: ts-engine
+    ports:
+      - "7000:7000"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:7000/health || exit 1" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 3G
+      placement:
+        constraints:
+          - cpuset=0-1
+
+  test-runner:
+    build: ./tests
+    container_name: test-runner
+    depends_on:
+      - python-engine
+      - ts-engine
+    volumes:
+      - ./tests:/app/tests
+      - ./engines:/app/engines
+      - ./archive:/app/archive
+      - ./ci:/app/ci
+      - ./llm:/app/llm
+    working_dir: /app
+    command: tail -f /dev/null
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+      placement:
+        constraints:
+          - cpuset=0-1

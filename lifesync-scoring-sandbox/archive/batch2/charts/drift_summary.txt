@@ -1,0 +1,14 @@
+Drift Analysis Summary
+======================
+Batch 1 Runs: 3390
+Batch 2 Runs: 20000
+Centroid Shift (Euclidean): 0.0000
+
+Trait Medians (Batch 1 -> Batch 2):
+  Openness: 50.00 -> 50.00 (Delta: 0.00)
+  Conscientiousness: 50.00 -> 50.00 (Delta: 0.00)
+  Extraversion: 50.00 -> 50.00 (Delta: 0.00)
+  Agreeableness: 50.00 -> 50.00 (Delta: 0.00)
+  Neuroticism: 50.00 -> 50.00 (Delta: 0.00)
+
+Status: Stable (No significant drift)

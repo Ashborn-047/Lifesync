@@ -27,7 +27,8 @@ def generate_explanation(
     dominant: Dict[str, str],
     provider: Optional[str] = None,
     system_prompt: Optional[str] = None,
-    tone_profile: Optional[Dict[str, Any]] = None
+    tone_profile: Optional[Dict[str, Any]] = None,
+    persona: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """
     Generate personality explanation with automatic provider fallback.
@@ -46,6 +47,7 @@ def generate_explanation(
         provider: Optional provider name (ignored, we use automatic fallback)
         system_prompt: Optional custom system prompt
         tone_profile: Optional tone profile
+        persona: Optional persona object
     
     Returns:
         Dictionary with explanation data OR error dict with "error" key
@@ -131,7 +133,8 @@ def generate_explanation(
                 confidence=confidence,
                 dominant=dominant,
                 system_prompt=system_prompt,
-                tone_profile=tone_profile
+                tone_profile=tone_profile,
+                persona=persona
             )
             
             logger.info(f"Provider {provider_type} ({model_name}) returned response successfully")

@@ -1,0 +1,8 @@
+{
+    "files": {
+        "engines/ts-engine/computeProfile.ts": "41d3f4eae0458015f44256d084c8b1a232c0af1f13d74cf0522de9719ee19ab0",
+        "engines/ts-engine/normalizeScores.ts": "a1ea86155fc1415d03b42b298fbfba6e85e9ebe36d9c7b3cc6fc0f9004f148cb",
+        "engines/ts-engine/mapping/factorMapping.ts": "d09fad8275ed7070a9ed411945194c67de8f9bd5d2b2d0a14709deba2d606fcb",
+        "engines/python-engine/compute_ocean.py": "b7f60ad78021b5097e92d7308a0f6f53963cc404558cfd2d1c4576a138463d57"
+    }
+}
