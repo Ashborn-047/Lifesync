@@ -45,7 +45,7 @@ export const GradientCard: React.FC<GradientCardProps> = ({
       style={[styles.card, style as any]}
     >
       <LinearGradient
-        colors={gradient as string[]}
+        colors={gradient as any}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradient}

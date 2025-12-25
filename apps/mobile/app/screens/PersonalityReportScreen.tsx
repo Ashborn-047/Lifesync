@@ -127,7 +127,7 @@ export const PersonalityReportScreen: React.FC = () => {
               style={styles.glowContainer}
             >
               <LinearGradient
-                colors={isUniform ? ['#EF4444', '#F97316'] : (gradients.personaGradient || ['#8B5CF6', '#3B82F6'])}
+                colors={(isUniform ? ['#EF4444', '#F97316'] : (gradients.personaGradient || ['#8B5CF6', '#3B82F6'])) as any}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.personaGradient}
@@ -255,7 +255,7 @@ export const PersonalityReportScreen: React.FC = () => {
             {strengths.map((strength, index) => (
               <MotiView key={index} {...createStagger(6 + index, 100)}>
                 <View style={styles.insightCard}>
-                  <Ionicons name="checkmark-circle" size={24} color={colors.success || '#10B981'} />
+                  <Ionicons name="checkmark-circle" size={24} color={['#4F46E5', '#10B981'] as any} />
                   <Text style={styles.insightText}>{strength}</Text>
                 </View>
               </MotiView>
@@ -302,7 +302,7 @@ export const PersonalityReportScreen: React.FC = () => {
               activeOpacity={0.8}
             >
               <LinearGradient
-                colors={gradients.personaGradient || ['#8B5CF6', '#3B82F6']}
+                colors={(gradients.personaGradient || ['#8B5CF6', '#3B82F6']) as any}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.buttonGradient}

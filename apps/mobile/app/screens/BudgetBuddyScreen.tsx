@@ -30,7 +30,7 @@ export const BudgetBuddyScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -60,7 +60,7 @@ export const BudgetBuddyScreen: React.FC = () => {
             title="Monthly Budget"
             subtitle="$2,500 remaining"
             icon="wallet"
-            onPress={() => {}}
+            onPress={() => { }}
             delay={100}
             style={styles.budgetCard}
           />
@@ -72,11 +72,11 @@ export const BudgetBuddyScreen: React.FC = () => {
           subtitle="Your spending overview"
           delay={200}
         />
-        
+
         <MotiView {...createStagger(2, 100)}>
           <View style={styles.statsCard}>
             <View style={styles.statsRow}>
-              <MetricChip label="Spent" value="$1,200" backgroundColor={colors.cardPink + '20'} />
+              <MetricChip label="Spent" value="$1,200" backgroundColor={'#4F46E5' + '20'} />
               <MetricChip label="Saved" value="$800" backgroundColor={colors.success + '20'} />
               <MetricChip label="Budget" value="$3,000" backgroundColor={colors.primary + '20'} />
             </View>
@@ -89,7 +89,7 @@ export const BudgetBuddyScreen: React.FC = () => {
           subtitle="Record a new transaction"
           delay={400}
         />
-        
+
         <MotiView {...createStagger(3, 100)}>
           <View style={styles.expenseCard}>
             <TextInput
@@ -127,7 +127,7 @@ export const BudgetBuddyScreen: React.FC = () => {
           subtitle="Your latest transactions"
           delay={600}
         />
-        
+
         {[
           { name: 'Groceries', amount: '$120', date: 'Today' },
           { name: 'Coffee', amount: '$5', date: 'Yesterday' },

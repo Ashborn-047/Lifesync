@@ -27,7 +27,7 @@ export const CareerCompassScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -40,7 +40,7 @@ export const CareerCompassScreen: React.FC = () => {
           style={styles.heroBar}
         >
           <LinearGradient
-            colors={gradients.heroGradient}
+            colors={(gradients.heroGradient as any) as any}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.heroGradient}
@@ -69,7 +69,7 @@ export const CareerCompassScreen: React.FC = () => {
           subtitle="Based on your personality profile"
           delay={200}
         />
-        
+
         <View style={styles.careersGrid}>
           {[
             { title: 'UX Designer', icon: 'color-palette' },
@@ -83,7 +83,7 @@ export const CareerCompassScreen: React.FC = () => {
                 activeOpacity={0.8}
               >
                 <LinearGradient
-                  colors={gradients.careerGradient}
+                  colors={(gradients.careerGradient as any) as any}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.careerItemGradient}
@@ -102,7 +102,7 @@ export const CareerCompassScreen: React.FC = () => {
           subtitle="Combining multiple interests"
           delay={500}
         />
-        
+
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -132,7 +132,7 @@ export const CareerCompassScreen: React.FC = () => {
           subtitle="Compare your top matches"
           delay={800}
         />
-        
+
         <MotiView {...createStagger(8, 100)}>
           <View style={styles.comparisonCard}>
             <Text style={styles.comparisonPlaceholder}>
@@ -147,7 +147,7 @@ export const CareerCompassScreen: React.FC = () => {
           subtitle="Books to explore your career interests"
           delay={900}
         />
-        
+
         {[1, 2, 3].map((item, index) => (
           <MotiView key={item} {...createStagger(9 + index, 100)}>
             <View style={styles.readingItem}>
@@ -166,7 +166,7 @@ export const CareerCompassScreen: React.FC = () => {
           subtitle="See how others with similar profiles succeeded"
           delay={1200}
         />
-        
+
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}

@@ -547,6 +547,13 @@ export const PERSONAS: Persona[] = [
     }
 ];
 
+/**
+ * Get persona by ID or MBTI code
+ */
+export function getPersona(idOrMbti: string): Persona | null {
+    return PERSONAS.find(p => p.id === idOrMbti || p.mbti?.startsWith(idOrMbti)) || null;
+}
+
 // --- Matching algorithm utilities ---
 
 function inRange(val: number, [min, max]: [number, number]) {

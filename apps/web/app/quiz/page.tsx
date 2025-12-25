@@ -101,7 +101,7 @@ export default function QuizPage() {
       const result = await submitAssessment(assessmentResponses);
 
       // Handle Offline Mode (Solution: Save for later sync)
-      if (result.is_offline) {
+      if (result.metadata?.is_fallback) {
         console.log("⚠️ Result generated offline. Queuing for sync.");
 
         // Save to Sync Queue

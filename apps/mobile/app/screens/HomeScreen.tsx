@@ -116,7 +116,7 @@ export const HomeScreen: React.FC = () => {
           style={styles.heroBar}
         >
           <LinearGradient
-            colors={gradients.heroGradient}
+            colors={gradients.heroGradient as any}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.heroGradient}
@@ -171,7 +171,7 @@ export const HomeScreen: React.FC = () => {
 
         <MotiView {...createStagger(3, 100)}>
           <GradientCard
-            gradient={gradients.personaGradient}
+            gradient={gradients.personaGradient as any}
             title={personalityTitle}
             subtitle={personalitySubtitle}
             icon={personaIcon}
@@ -226,7 +226,7 @@ export const HomeScreen: React.FC = () => {
 
         <MotiView {...createStagger(9, 100)}>
           <GradientCard
-            gradient={gradients.careerGradient}
+            gradient={gradients.careerGradient as any}
             title="Career DNA"
             subtitle="Explore your ideal career paths"
             icon="briefcase"

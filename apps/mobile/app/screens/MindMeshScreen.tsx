@@ -24,6 +24,7 @@ export const MindMeshScreen: React.FC = () => {
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [duration, setDuration] = useState(10);
 
+  const mcolors = ['#ec4899', '#8b5cf6'] as any;
   const moods = ['Calm', 'Focused', 'Energized', 'Restful'];
   const goals = ['Reduce Stress', 'Improve Focus', 'Better Sleep', 'Emotional Balance'];
 
@@ -57,7 +58,7 @@ export const MindMeshScreen: React.FC = () => {
           style={styles.heroBar}
         >
           <LinearGradient
-            colors={gradients.wellnessGradient}
+            colors={gradients.wellnessGradient as any}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.heroGradient}
@@ -70,7 +71,7 @@ export const MindMeshScreen: React.FC = () => {
         {/* Interactive Surface */}
         <MotiView {...createStagger(1, 100)}>
           <LinearGradient
-            colors={gradients.brandGradient}
+            colors={gradients.brandGradient as any}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.interactiveSurface}
@@ -152,7 +153,7 @@ export const MindMeshScreen: React.FC = () => {
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={gradients.wellnessGradient}
+              colors={gradients.wellnessGradient as any}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.buttonGradient}
