@@ -22,6 +22,7 @@ export type Persona = {
     strengths: string[];
     growth: string[];
     description: string;
+    icon?: string;
     llm_template?: string; // short template for LLM to expand
     tags?: string[];
     example_note?: string;
@@ -53,6 +54,7 @@ export const PERSONAS: Persona[] = [
         ],
         description:
             "A reserved thinker who prefers observation and analysis over social stimulation. Practical, internally driven, and often self-sufficient.",
+        icon: "eye",
         llm_template:
             "Summarize persona: factual, concise (3-4 short paragraphs). Focus on behavioral cues and actionable growth suggestions."
     },
@@ -82,6 +84,7 @@ export const PERSONAS: Persona[] = [
         ],
         description:
             "Structured and practical. Prioritizes efficiency and order — excels with predictable systems and clear responsibilities.",
+        icon: "shield",
         llm_template:
             "Create a pragmatic, trust-building narrative. Include 3 action tips for improving flexibility and interpersonal warmth."
     },
@@ -111,6 +114,7 @@ export const PERSONAS: Persona[] = [
         ],
         description:
             "A powerhouse of ideas and energy. Brings enthusiasm and breadth of vision but may struggle with consistency and stress.",
+        icon: "sparkles",
         llm_template:
             "Write a vivid, motivational persona summary emphasizing channeling creative energy into sustainable routines. Include two small habit suggestions."
     },
@@ -139,6 +143,7 @@ export const PERSONAS: Persona[] = [
         ],
         description:
             "Hands-on, resourceful, and pragmatic. Prefers direct action and practical solutions; comfortable experimenting in real conditions.",
+        icon: "wrench",
         llm_template:
             "Offer experimental learning steps and 3 real-world projects or routines to apply skills."
     },
@@ -167,6 +172,7 @@ export const PERSONAS: Persona[] = [
         ],
         description:
             "Warm, responsive, and attuned to social dynamics. Focuses on keeping people connected and supported.",
+        icon: "heart",
         llm_template:
             "Give interpersonal scripts for boundary-setting and proactive self-care practices in friendly tone."
     },
@@ -195,6 +201,7 @@ export const PERSONAS: Persona[] = [
         ],
         description:
             "Values order and predictable performance; excels at translating plans into results.",
+        icon: "clipboard",
         llm_template:
             "Provide a crisp 3-point action plan for delegating, prioritizing, and delegating softer communication."
     },
@@ -223,6 +230,7 @@ export const PERSONAS: Persona[] = [
         ],
         description:
             "Reflective and values-driven. Prefers meaningful work and considered judgment over quick wins.",
+        icon: "book",
         llm_template:
             "Create a grounded, empathetic narrative focusing on meaningful next steps and guardrails against burnout."
     },
@@ -251,6 +259,7 @@ export const PERSONAS: Persona[] = [
         ],
         description:
             "Leads by inspiration and human understanding. Great at aligning people around a mission.",
+        icon: "users",
         llm_template:
             "Write a motivational piece that translates big vision into 3 tactical actions and invites accountability."
     },
@@ -279,6 +288,7 @@ export const PERSONAS: Persona[] = [
         ],
         description:
             "Prefers stable roles and is driven by responsibility to others. Effective in maintenance and support roles.",
+        icon: "home",
         llm_template:
             "Offer gentle encouragement and concrete delegation experiments to free bandwidth."
     },
@@ -307,6 +317,7 @@ export const PERSONAS: Persona[] = [
         ],
         description:
             "Prefers autonomy and long-range planning. Strong at systems thinking and high-complexity problems.",
+        icon: "lightbulb",
         llm_template:
             "Explain pragmatic steps to prototype strategy and soft-skill practice for team alignment."
     },
@@ -335,6 +346,7 @@ export const PERSONAS: Persona[] = [
         ],
         description:
             "Excels in rapid prototyping and ideation. Needs structure to realize ideas repeatedly.",
+        icon: "rocket",
         llm_template:
             "Provide experiment-style suggestions and a 2-week follow-through plan."
     },
@@ -363,6 +375,7 @@ export const PERSONAS: Persona[] = [
         ],
         description:
             "Thrives in dynamic environments. Tactical and immediate — loves hands-on challenges.",
+        icon: "zap",
         llm_template:
             "Recommend immediate projects and micro-retrospectives for learning from action."
     },

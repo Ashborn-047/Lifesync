@@ -43,7 +43,7 @@ export const BudgetBuddyScreen: React.FC = () => {
           style={styles.heroBar}
         >
           <LinearGradient
-            colors={gradients.careerGradient}
+            colors={gradients.careerGradient as any}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.heroGradient}
@@ -109,7 +109,7 @@ export const BudgetBuddyScreen: React.FC = () => {
               activeOpacity={0.8}
             >
               <LinearGradient
-                colors={gradients.careerGradient}
+                colors={gradients.careerGradient as any}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.addButtonGradient}

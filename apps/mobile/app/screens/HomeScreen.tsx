@@ -67,7 +67,7 @@ export const HomeScreen: React.FC = () => {
   const personalityTitle = useMemo(() => {
     if (!result?.mbti) return 'Take Personality Quiz';
     if (persona) {
-      return `${result.mbti} - ${persona.personaName}`;
+      return `${result.mbti} - ${persona.title}`;
     }
     return result.mbti;
   }, [result?.mbti, persona]);

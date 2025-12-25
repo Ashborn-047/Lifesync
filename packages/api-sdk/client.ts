@@ -359,6 +359,7 @@ export const getAssessment = async (
       traits_with_data: backendData.traits_with_data,
       needs_retake: backendData.needs_retake,  // Solution C
       needs_retake_reason: backendData.needs_retake_reason,  // Solution C
+      explanation: backendData.explanation,
     };
 
     return result;
