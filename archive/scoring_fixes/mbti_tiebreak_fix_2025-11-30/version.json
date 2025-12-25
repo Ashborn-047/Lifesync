@@ -1,0 +1,13 @@
+{
+    "fix_id": "mbti_tiebreak_fix",
+    "date": "2025-11-30",
+    "applied_to": "packages/personality-engine",
+    "sandbox_version": "batch2_verified_100pct",
+    "parity_check": "passed",
+    "drift": 0.0,
+    "files_modified": [
+        "computeProfile.ts",
+        "factorMapping.ts",
+        "aggregateTraits.ts"
+    ]
+}

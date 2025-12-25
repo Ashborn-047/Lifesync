@@ -23,6 +23,15 @@ LifeSync is a comprehensive personality assessment platform that combines the Bi
 - **Data Persistence**: Mobile app stores assessment results locally
 - **PDF Reports**: Downloadable personality assessment reports
 
+## Architecture
+
+### Canonical Scoring (Hardened)
+- **Backend First**: The Python engine is the single source of truth.
+- **Strict Validation**: All scores are validated against a strict schema (0-1.0 range, mandatory metadata).
+- **Safe Fallback**: Offline mode uses a compatible local engine, strictly mapped to the canonical contract.
+- **Versioning**: `SCORING_VERSION` ensures compatibility between frontend and backend.
+
+
 ## Tech Stack
 
 ### Backend

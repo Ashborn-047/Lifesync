@@ -1,0 +1,18 @@
+{
+    "name": "@lifesync/personality-engine",
+    "version": "0.1.0",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist/",
+        "data/"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "test": "vitest"
+    },
+    "devDependencies": {
+        "typescript": "^5.0.0",
+        "vitest": "^0.34.0"
+    }
+}

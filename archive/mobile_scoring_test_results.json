@@ -1,0 +1,105 @@
+{
+  "timestamp": "2025-11-29T07:17:17.894Z",
+  "assessment_id": "dd61b870-6fb4-4eb5-b542-83de43f6b46d",
+  "is_complete": true,
+  "coverage": 16.7,
+  "responses_count": 30,
+  "traits": {
+    "Openness": 0.875,
+    "Conscientiousness": 0.625,
+    "Extraversion": 0.625,
+    "Agreeableness": 0.667,
+    "Neuroticism": 0.5
+  },
+  "trait_percentages": [
+    {
+      "name": "Openness",
+      "score": 0.875,
+      "percentage": "87.5%"
+    },
+    {
+      "name": "Conscientiousness",
+      "score": 0.625,
+      "percentage": "62.5%"
+    },
+    {
+      "name": "Extraversion",
+      "score": 0.625,
+      "percentage": "62.5%"
+    },
+    {
+      "name": "Agreeableness",
+      "score": 0.667,
+      "percentage": "66.7%"
+    },
+    {
+      "name": "Neuroticism",
+      "score": 0.5,
+      "percentage": "50.0%"
+    }
+  ],
+  "dominant": {
+    "mbti_proxy": "ENFJ",
+    "neuroticism_level": "Balanced",
+    "personality_code": "ENFJ-B"
+  },
+  "top_facets": [
+    [
+      "Aesthetics",
+      1
+    ],
+    [
+      "Actions",
+      1
+    ],
+    [
+      "Ideas",
+      1
+    ],
+    [
+      "Order",
+      1
+    ],
+    [
+      "Fantasy",
+      0.75
+    ]
+  ],
+  "input_responses": {
+    "Q001": 4,
+    "Q007": 5,
+    "Q013": 4,
+    "Q019": 5,
+    "Q025": 5,
+    "Q031": 4,
+    "Q037": 4,
+    "Q043": 5,
+    "Q049": 3,
+    "Q055": 4,
+    "Q061": 3,
+    "Q067": 2,
+    "Q073": 3,
+    "Q079": 3,
+    "Q085": 4,
+    "Q091": 4,
+    "Q097": 3,
+    "Q103": 4,
+    "Q109": 4,
+    "Q115": 3,
+    "Q121": 4,
+    "Q127": 4,
+    "Q133": 3,
+    "Q139": 4,
+    "Q145": 3,
+    "Q151": 3,
+    "Q157": 3,
+    "Q163": 3,
+    "Q169": 3,
+    "Q175": 3
+  },
+  "diagnostics": {
+    "all_scores_low": false,
+    "any_score_very_low": false,
+    "average_score": 65.84
+  }
+}

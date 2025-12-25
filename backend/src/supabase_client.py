@@ -40,20 +40,24 @@ class SupabaseClient:
     
     def create_assessment(
         self,
-        quiz_type: str = "full"
+        quiz_type: str = "full",
+        user_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Create a new personality assessment.
         
         Args:
             quiz_type: Type of quiz ('quick', 'standard', 'full')
+            user_id: Optional User ID to link assessment
         
         Returns:
             Assessment record with id
         """
-        result = self.client.table("personality_assessments").insert({
-            "quiz_type": quiz_type
-        }).execute()
+        data = {"quiz_type": quiz_type}
+        if user_id:
+            data["user_id"] = user_id
+            
+        result = self.client.table("personality_assessments").insert(data).execute()
         
         return result.data[0] if result.data else {}
     
@@ -116,11 +120,32 @@ class SupabaseClient:
         dominant = scores.get("dominant", {})
         
         # Prepare data matching the schema
+        # We assume columns exist or we pack into metadata if possible. 
+        # Ideally, schema has: confidence, persona_id, engine_version, etc.
+        # If not, we leverage the JSONB columns to store this extra context until migration.
+        
+        # Extract metadata
+        meta = scores.get("metadata", {})
+        
         update_data = {
             "raw_scores": raw_responses,  # Store original responses as JSONB
             "trait_scores": traits,  # Store trait scores as JSONB
             "facet_scores": facets,  # Store facet scores as JSONB
-            "mbti_code": dominant.get("mbti_proxy", "")  # Store MBTI code
+            "mbti_code": scores.get("mbti_proxy") or dominant.get("mbti_proxy", ""),
+            
+            # Canonical Fields Persistence
+            "persona_id": scores.get("persona_id"),
+            "confidence": scores.get("confidence"),
+            
+            # Metadata Persistence (Pack into a JSONB column if distinct columns missing)
+            "metadata": {
+                "engine_version": meta.get("engine_version"),
+                "scoring_version": meta.get("scoring_version"),
+                "timestamp": meta.get("timestamp"),
+                "quiz_type": meta.get("quiz_type"),
+                "platform": meta.get("platform"),
+                "is_fallback": meta.get("is_fallback", False)
+            }
         }
         
         result = self.client.table("personality_assessments").update(
@@ -243,6 +268,49 @@ class SupabaseClient:
         ).execute()
         
         return result.data[0] if result.data else None
+    
+    def upsert_profile(
+        self,
+        user_id: str,
+        assessment_id: str
+    ) -> Dict[str, Any]:
+        """
+        Update user profile with latest assessment.
+        """
+        data = {
+            "user_id": user_id,
+            "current_assessment_id": assessment_id,
+            "updated_at": "now()"
+        }
+        
+        # Upsert based on user_id (unique constraint)
+        result = self.client.table("profiles").upsert(
+            data, on_conflict="user_id"
+        ).execute()
+        
+        return result.data[0] if result.data else {}
+
+    def get_profile(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get user profile with current assessment details"""
+        # Join with assessments to get the actual scoring data
+        # Note: Supabase-py join syntax depends on FK setup. 
+        # We select profiles.* and the nested assessment data.
+        result = self.client.table("profiles").select(
+            "*, current_assessment:personality_assessments(*)"
+        ).eq("user_id", user_id).execute()
+        
+        return result.data[0] if result.data else None
+
+    def get_history(self, user_id: str, limit: int = 20) -> List[Dict[str, Any]]:
+        """Get assessment history for user"""
+        result = self.client.table("personality_assessments").select(
+            "id, created_at, quiz_type, mbti_code, persona_id, trait_scores, confidence"
+        ).eq("user_id", user_id).order(
+            "created_at", desc=True
+        ).limit(limit).execute()
+        
+        return result.data if result.data else []
+
 
 
 def create_supabase_client(

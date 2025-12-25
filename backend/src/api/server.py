@@ -28,7 +28,7 @@ from ..ai.explanation_generator import generate_explanation_with_tone
 from ..ai.pdf_generator import generate_pdf
 from ..supabase_client import create_supabase_client, SupabaseClient
 from ..llm.router import generate_explanation as router_generate_explanation
-from .routes import questions as questions_router
+from .routes import questions as questions_router, assessments as assessments_router, profiles as profiles_router
 from typing import List
 
 logger = logging.getLogger(__name__)
@@ -67,6 +67,9 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Include routers
 app.include_router(questions_router.router, tags=["questions"])
+app.include_router(assessments_router.router, tags=["assessments"])
+app.include_router(profiles_router.router, tags=["profiles"])
+ # Included assessments router
 
 # Pydantic models for questions endpoint
 class QuestionOut(BaseModel):
@@ -572,69 +575,6 @@ def generate_explanation(
 # If you need Supabase questions, use a different endpoint like /v1/questions/db
 
 
-@app.get("/v1/assessments/{user_id}/history", response_model=List[AssessmentHistoryItem])
-@log_api_request("/v1/assessments/{user_id}/history")
-def get_assessment_history(
-    user_id: str,
-    supabase: SupabaseClient = Depends(get_supabase_client)
-):
-    """
-    Get assessment history for a user.
-    
-    Returns:
-        List of assessment history items, sorted by newest first
-    """
-    try:
-        if not supabase:
-            raise HTTPException(status_code=500, detail="Supabase client not initialized")
-        
-        # Get all assessments (sorted by created_at desc)
-        # Note: Current schema doesn't have user_id, so we'll return all assessments
-        # In production, you'd filter by user_id
-        resp = (
-            supabase.client.table("personality_assessments")
-            .select("id,created_at,trait_scores,facet_scores,mbti_code")
-            .order("created_at", desc=True)
-            .limit(100)
-            .execute()
-        )
-        
-        if not resp.data:
-            return []
-        
-        # Get explanations for assessments
-        history_items = []
-        for assessment in resp.data:
-            # Get explanation if available
-            explanation_resp = (
-                supabase.client.table("llm_explanations")
-                .select("explanation")
-                .eq("assessment_id", assessment["id"])
-                .order("generated_at", desc=True)
-                .limit(1)
-                .execute()
-            )
-            
-            summary = None
-            if explanation_resp.data and len(explanation_resp.data) > 0:
-                summary = explanation_resp.data[0].get("explanation", "")[:200]  # First 200 chars
-            
-            history_items.append(AssessmentHistoryItem(
-                assessment_id=assessment["id"],
-                created_at=assessment["created_at"],
-                traits=assessment.get("trait_scores", {}),
-                facets=assessment.get("facet_scores", {}),
-                mbti=assessment.get("mbti_code", "N/A"),
-                summary=summary
-            ))
-        
-        return history_items
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception("GET /v1/assessments/{user_id}/history failed")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @app.post("/v1/assessments/{assessment_id}/share", response_model=ShareResponse)

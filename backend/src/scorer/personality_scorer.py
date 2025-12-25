@@ -6,6 +6,7 @@ Handles 180-question OCEAN assessment with 30 facets
 import json
 from typing import Dict, List, Tuple, Optional, Union
 from collections import defaultdict
+from src.config.constants import SCORING_VERSION
 
 
 class PersonalityScorer:
@@ -144,7 +145,42 @@ class PersonalityScorer:
         top_facets = self._get_top_facets(valid_facets, n=5) if valid_facets else []
         
         # Build result with proper null handling
+        # 🟢 Canonical Contract Alignment
+        ocean_scores = {
+            'O': round(trait_scores['O'], 3) if trait_scores['O'] is not None else 0.0, # Default to 0.0 for strict type safety if needed, or stick to None but Schema requires number? 
+            # User said: "ocean: { O, C, E, A, N }" implies numbers. If insufficient data, maybe 0 or -1? 
+            # Or perhaps better to keep None but model allows None. 
+            # Wait, "Clients render ONLY what backend returns". If backend returns None, client must handle it.
+            # However, for Canonical "hard boundary", usually strict types are better. 
+            # Let's stick to the current logic but mapped to 'ocean' key.
+            # Actually, let's keep None to indicate missing data clearly.
+            'C': round(trait_scores['C'], 3) if trait_scores['C'] is not None else 0.0,
+            'E': round(trait_scores['E'], 3) if trait_scores['E'] is not None else 0.0,
+            'A': round(trait_scores['A'], 3) if trait_scores['A'] is not None else 0.0,
+            'N': round(trait_scores['N'], 3) if trait_scores['N'] is not None else 0.0
+        }
+
+        # Calculate global confidence (Average of non-zero trait confidences)
+        conf_values = [v for v in trait_confidence.values() if v > 0]
+        global_confidence = round(sum(conf_values) / len(conf_values), 2) if conf_values else 0.0
+
+        # Persona ID (Derive from MBTI or fallback)
+        persona_id = mbti_code.lower() if mbti_code and mbti_code != "UNKN" else "unknown"
+
         result = {
+            # Canonical Contract Fields
+            'ocean': ocean_scores,
+            'persona_id': persona_id,
+            'mbti_proxy': mbti_code,
+            'confidence': global_confidence,
+            'metadata': {
+                'quiz_type': 'full180' if len(responses) >= 60 else 'quick', # Simple heuristic for now
+                'engine_version': '2.0.0',
+                'scoring_version': SCORING_VERSION,
+                'timestamp': 0, # Will be filled by API route
+            },
+            
+            # Legacy/Detailed Fields (still useful for internal logic or detailed views)
             'traits': {
                 'Openness': round(trait_scores['O'], 3) if trait_scores['O'] is not None else None,
                 'Conscientiousness': round(trait_scores['C'], 3) if trait_scores['C'] is not None else None,
