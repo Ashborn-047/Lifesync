@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - "web/**"
+      - "apps/web/**"
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./web
+        working-directory: ./apps/web
 
     steps:
       - name: Checkout repository
@@ -49,7 +49,7 @@ jobs:
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./web/out
+          path: ./apps/web/out
 
   deploy:
     name: Deploy to GitHub Pages
