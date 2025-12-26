@@ -21,10 +21,6 @@ jobs:
   build:
     name: Build Web App
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./apps/web
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -42,6 +38,7 @@ jobs:
           echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL || 'https://lifesync-hzx1.onrender.com' }}" >> $GITHUB_ENV
 
       - name: Build Next.js
+        working-directory: ./apps/web
         run: npm run build
         env:
           NEXT_PUBLIC_API_URL: ${{ env.NEXT_PUBLIC_API_URL }}
