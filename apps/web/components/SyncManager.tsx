@@ -5,7 +5,7 @@ import { syncOfflineResults } from "@lifesync/api-sdk";
 import { useToast } from "@/components/ui/Toast";
 
 export default function SyncManager() {
-    const { toast } = useToast();
+    const { showToast } = useToast();
 
     useEffect(() => {
         const sync = async () => {
@@ -38,11 +38,10 @@ export default function SyncManager() {
                     // Success! Clear queue
                     localStorage.removeItem("pending_sync_queue");
 
-                    toast({
-                        title: "Sync Complete",
-                        description: `Successfully synced ${result.synced.length} offline assessment(s).`,
-                        variant: "success"
-                    });
+                    showToast(
+                        `Successfully synced ${result.synced.length} offline assessment(s).`,
+                        "success"
+                    );
 
                     console.log("Sync success:", result);
                 }
@@ -59,7 +58,7 @@ export default function SyncManager() {
         // Optional: Add online listener
         window.addEventListener('online', sync);
         return () => window.removeEventListener('online', sync);
-    }, [toast]);
+    }, [showToast]);
 
     return null; // Headless component
 }

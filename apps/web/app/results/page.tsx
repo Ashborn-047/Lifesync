@@ -22,7 +22,7 @@ import LoadingOverlay from "@/components/ui/LoadingOverlay";
 import InvalidAssessmentBanner from "@/components/results/InvalidAssessmentBanner";
 import PersonalityResultCard from "@/components/results/PersonalityResultCard";
 import { generateExplanation, shareResult, downloadPDF, getAssessment } from "@lifesync/api-sdk";
-import type { AssessmentResult } from "@lifesync/types";
+import type { AssessmentResult, ParsedExplanation } from "@lifesync/types";
 import { mapProfileToPersona, detectUniformResponses, type OCEAN, PERSONAS } from "@lifesync/personality-engine/mapping/personaMapping";
 
 // ... (keep other imports)
@@ -37,7 +37,7 @@ function ResultsPageContent() {
   const [error, setError] = useState<string | null>(null);
 
   // Explanation state
-  const [explanation, setExplanation] = useState<any>(null);
+  const [explanation, setExplanation] = useState<ParsedExplanation | null>(null);
   const [isLoadingExplanation, setIsLoadingExplanation] = useState(false);
 
   // UI state
@@ -370,7 +370,7 @@ function ResultsPageContent() {
                 ) : null}
 
                 {/* Vibe Summary */}
-                {explanation.vibe_summary ? (
+                {explanation?.vibe_summary ? (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -380,20 +380,20 @@ function ResultsPageContent() {
                       {explanation.vibe_summary}
                     </p>
                   </motion.div>
-                ) : explanation.summary ? (
+                ) : explanation?.summary ? (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                   >
                     <p className="text-body-lg text-white/90 leading-relaxed">
-                      {explanation.summary}
+                      {explanation?.summary}
                     </p>
                   </motion.div>
                 ) : null}
 
                 {/* How You Show Up */}
-                {explanation.how_you_show_up ? (
+                {explanation?.how_you_show_up ? (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -409,8 +409,7 @@ function ResultsPageContent() {
                   </motion.div>
                 ) : null}
 
-                {/* Strengths */}
-                {explanation.strengths && explanation.strengths.length > 0 ? (
+                {explanation?.strengths && explanation.strengths.length > 0 ? (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -435,8 +434,8 @@ function ResultsPageContent() {
                 ) : null}
 
                 {/* Growth Edges */}
-                {(explanation.growth_edges && explanation.growth_edges.length > 0) ||
-                  (explanation.cautions && explanation.cautions.length > 0) ? (
+                {(explanation?.growth_edges && explanation.growth_edges.length > 0) ||
+                  (explanation?.cautions && explanation.cautions.length > 0) ? (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
