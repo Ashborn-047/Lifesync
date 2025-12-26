@@ -360,6 +360,7 @@ export const getAssessment = async (
       needs_retake: backendData.needs_retake,  // Solution C
       needs_retake_reason: backendData.needs_retake_reason,  // Solution C
       explanation: backendData.explanation,
+      answers: backendData.answers,
     };
 
     return result;

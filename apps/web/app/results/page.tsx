@@ -22,6 +22,7 @@ import LoadingOverlay from "@/components/ui/LoadingOverlay";
 import InvalidAssessmentBanner from "@/components/results/InvalidAssessmentBanner";
 import PersonalityResultCard from "@/components/results/PersonalityResultCard";
 import { generateExplanation, shareResult, downloadPDF, getAssessment } from "@lifesync/api-sdk";
+import type { AssessmentResult } from "@lifesync/types";
 import { mapProfileToPersona, detectUniformResponses, type OCEAN, PERSONAS } from "@lifesync/personality-engine/mapping/personaMapping";
 
 // ... (keep other imports)
@@ -31,7 +32,7 @@ function ResultsPageContent() {
   const searchParams = useSearchParams();
   const assessmentId = searchParams.get("id");
 
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<AssessmentResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -113,8 +114,8 @@ function ResultsPageContent() {
     if (!result) return;
     setIsSharing(true);
     try {
-      const url = await shareResult(result.assessment_id);
-      setShareUrl(url);
+      const urlResponse = await shareResult(result.assessment_id);
+      setShareUrl(urlResponse.url);
     } catch (e) {
       console.error(e);
     } finally {
