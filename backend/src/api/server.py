@@ -28,7 +28,7 @@ from ..ai.explanation_generator import generate_explanation_with_tone
 from ..ai.pdf_generator import generate_pdf
 from ..supabase_client import create_supabase_client, SupabaseClient
 from ..llm.router import generate_explanation as router_generate_explanation
-from .routes import questions as questions_router, assessments as assessments_router, profiles as profiles_router
+from .routes import questions as questions_router, assessments as assessments_router, profiles as profiles_router, auth as auth_router
 from typing import List
 
 logger = logging.getLogger(__name__)
@@ -69,6 +69,7 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.include_router(questions_router.router, tags=["questions"])
 app.include_router(assessments_router.router, tags=["assessments"])
 app.include_router(profiles_router.router, tags=["profiles"])
+app.include_router(auth_router.router, prefix="/v1/auth", tags=["auth"])
  # Included assessments router
 
 # Pydantic models for questions endpoint
@@ -172,22 +173,7 @@ class SharedAssessmentResponse(BaseModel):
 
 
 # Dependency functions
-def get_supabase_client() -> SupabaseClient:
-    """Dependency to get Supabase client"""
-    try:
-        url = config.get_supabase_url()
-        key = config.get_supabase_key()
-        if not url or not key or "your-project" in url or "your-anon-key" in key:
-            raise ValueError(
-                "Supabase credentials not configured. Please set valid SUPABASE_URL and SUPABASE_KEY in .env file. "
-                "Current values appear to be placeholders."
-            )
-        return create_supabase_client(url=url, key=key)
-    except Exception as e:
-        print(f"ERROR creating Supabase client: {e}")
-        import traceback
-        traceback.print_exc()
-        raise
+from .dependencies import get_supabase_client
 
 
 # API Routes

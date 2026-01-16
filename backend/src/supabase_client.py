@@ -19,16 +19,23 @@ except ImportError:
 class SupabaseClient:
     """Client for interacting with Supabase database"""
     
-    def __init__(self, url: Optional[str] = None, key: Optional[str] = None):
+    def __init__(
+        self, 
+        url: Optional[str] = None, 
+        key: Optional[str] = None,
+        service_key: Optional[str] = None
+    ):
         """
         Initialize Supabase client.
         
         Args:
             url: Supabase project URL (defaults to SUPABASE_URL env var)
             key: Supabase anon key (defaults to SUPABASE_KEY env var)
+            service_key: Supabase service role key (defaults to SUPABASE_SERVICE_ROLE env var)
         """
         self.url = url or os.getenv("SUPABASE_URL")
         self.key = key or os.getenv("SUPABASE_KEY")
+        self.service_key = service_key or os.getenv("SUPABASE_SERVICE_ROLE")
         
         if not self.url or not self.key:
             raise ValueError(
@@ -36,7 +43,13 @@ class SupabaseClient:
                 "environment variables or pass them as parameters."
             )
         
+        # Standard client for user-level operations
         self.client: Client = create_client(self.url, self.key)
+        
+        # Service client for elevated operations (e.g., profile_id resolution)
+        self.service_client: Optional[Client] = None
+        if self.service_key:
+            self.service_client = create_client(self.url, self.service_key)
     
     def create_assessment(
         self,
@@ -311,11 +324,120 @@ class SupabaseClient:
         
         return result.data if result.data else []
 
+    # --- Authentication Methods ---
+
+    def sign_up(self, email: str, password: str, profile_id: str) -> Dict[str, Any]:
+        """
+        Register a new user and create their profile.
+        """
+        norm_email = email.strip().lower()
+        norm_profile_id = profile_id.strip().lower()
+
+        # 1. Supabase Auth Signup
+        try:
+            auth_resp = self.client.auth.sign_up({
+                "email": norm_email,
+                "password": password
+            })
+
+            if not auth_resp.user:
+                raise ValueError("Invalid credentials") # Generic failure
+
+            user_id = auth_resp.user.id
+            actual_email = auth_resp.user.email
+
+            # 2. Profile Creation
+            profile_data = {
+                "id": user_id,
+                "user_id": user_id, # Legacy compatibility
+                "profile_id": norm_profile_id,
+                "email": actual_email
+            }
+
+            try:
+                # Use service client to ensure resolution/insertion works 
+                # even if RLS is partially catching up or strict.
+                if self.service_client:
+                    self.service_client.table("profiles").insert(profile_data).execute()
+                else:
+                    self.client.table("profiles").insert(profile_data).execute()
+            except Exception as e:
+                # Treat signup as failed if profile creation fails
+                if self.service_client:
+                    try:
+                        self.service_client.auth.admin.delete_user(user_id)
+                    except:
+                        pass
+                raise ValueError("Invalid credentials")
+            
+            return {"user": auth_resp.user, "session": auth_resp.session}
+
+        except Exception:
+            raise ValueError("Invalid credentials")
+
+    def sign_in(self, identifier: str, password: str) -> Dict[str, Any]:
+        """
+        Sign in with email or profile_id.
+        """
+        ident = identifier.strip().lower()
+        resolved_email = None
+
+        if "@" in ident:
+            resolved_email = ident
+        else:
+            resolved_email = self._resolve_email(ident)
+
+        # Final authentication call (Always call even if resolution fails to prevent timing attacks)
+        try:
+            auth_resp = self.client.auth.sign_in_with_password({
+                "email": resolved_email or "invalid@example.com",
+                "password": password
+            })
+            if not auth_resp.session:
+                raise ValueError("Invalid credentials")
+            return {"user": auth_resp.user, "session": auth_resp.session}
+        except Exception:
+            raise ValueError("Invalid credentials")
+
+    def _resolve_email(self, profile_id: str) -> Optional[str]:
+        """
+        Resolve profile_id to email using service role.
+        """
+        if not self.service_client:
+            return None
+        
+        try:
+            result = self.service_client.table("profiles") \
+                .select("email") \
+                .eq("profile_id", profile_id.strip().lower()) \
+                .limit(1) \
+                .execute()
+            
+            return result.data[0]["email"] if result.data else None
+        except Exception:
+            return None
+
+    def sign_out(self):
+        """End current session."""
+        return self.client.auth.sign_out()
+
+    def reset_password(self, email: str, redirect_to: Optional[str] = None):
+        """Request password reset."""
+        params = {"email": email}
+        if redirect_to:
+            params["options"] = {"redirect_to": redirect_to}
+        return self.client.auth.reset_password_for_email(email, params.get("options"))
+
+    def update_password(self, new_password: str):
+        """Update password for authenticated user."""
+        return self.client.auth.update_user({"password": new_password})
+
 
 
 def create_supabase_client(
     url: Optional[str] = None,
-    key: Optional[str] = None
+    key: Optional[str] = None,
+    service_key: Optional[str] = None
 ) -> SupabaseClient:
     """
     Factory function to create a Supabase client.
@@ -323,9 +445,10 @@ def create_supabase_client(
     Args:
         url: Optional Supabase URL
         key: Optional Supabase key
+        service_key: Optional service role key
     
     Returns:
         SupabaseClient instance
     """
-    return SupabaseClient(url=url, key=key)
+    return SupabaseClient(url=url, key=key, service_key=service_key)
 

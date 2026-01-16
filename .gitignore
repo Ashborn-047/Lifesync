@@ -36,3 +36,10 @@ metro-cache/
 .DS_Store
 Thumbs.db
 
+# Internal / Legacy (Local Only)
+/archive
+/scripts
+/lifesync-scoring-sandbox
+/test_output.txt
+/.internal/
+

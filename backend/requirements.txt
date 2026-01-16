@@ -11,3 +11,4 @@ pandas
 pytest
 pytest-asyncio
 reportlab
+email-validator

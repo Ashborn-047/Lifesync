@@ -1,0 +1,9 @@
+services:
+  backend-test:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    # Overriding the default CMD to run the test script
+    command: python tests/test_auth_system.py
