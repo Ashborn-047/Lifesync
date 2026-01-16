@@ -4,8 +4,8 @@
  * matches the expected Python behavior. This is a minimal local parity check.
  */
 
-import { computeProfile } from "../../packages/personality-engine/scoring/computeProfile";
-import { Question } from "../../packages/personality-engine/types/Question";
+import { computeProfile } from "../../scoring/computeProfile";
+import { Question } from "../../types/Question";
 
 // Mock Questions (Minimal set to drive Openness)
 // We need enough weight to control the score.
@@ -88,7 +88,7 @@ let failures = 0;
 console.log("=== MINI PARITY TEST ===");
 
 for (const v of vectors) {
-    const profile = computeProfile(v.answers, questionsWithUnanswered);
+    const profile = computeProfile(v.answers as any, questionsWithUnanswered);
     // Extract S/N from MBTI (2nd letter)
     const ns = profile.mbti_type ? profile.mbti_type[1] : "X";
 

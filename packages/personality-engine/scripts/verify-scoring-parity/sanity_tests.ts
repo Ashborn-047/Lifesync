@@ -1,4 +1,4 @@
-import { _debug_mbti_tiebreak } from "../../packages/personality-engine/scoring/computeProfile";
+import { _debug_mbti_tiebreak } from "../../scoring/computeProfile";
 
 const cases = [
     { openness: 51, confidence: 0.2, expected: "N" },
