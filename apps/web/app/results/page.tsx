@@ -83,9 +83,9 @@ function ResultsPageContent() {
                 is_complete: true,
                 traits_with_data: ["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism"],
                 needs_retake: false,
-                needs_retake_reason: null,
-                explanation: null, // Will be generated later
-                answers: null,
+                needs_retake_reason: undefined,
+                explanation: undefined, // Will be generated later
+                answers: undefined,
               };
               setResult(data);
               setLoading(false);

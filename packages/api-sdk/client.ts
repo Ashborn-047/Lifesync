@@ -416,6 +416,8 @@ export const generateExplanation = async (
       tagline: "Sync pending...",
       persona_title: "Analysis Pending",
       vibe_summary: "Your deep analysis is waiting for a secure server connection.",
+      cautions: [],
+      tone: "Pending",
     };
   }
 
