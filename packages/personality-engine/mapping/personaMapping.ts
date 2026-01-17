@@ -24,11 +24,15 @@ export type Persona = {
     description: string;
     icon?: string;
     llm_template?: string; // short template for LLM to expand
+    llm_template_version?: number;
+    is_active?: boolean;
+    updated_at?: string;
     tags?: string[];
     example_note?: string;
 };
 
-export const PERSONAS: Persona[] = [
+// Hardcoded fallback personas (emergency use only)
+export const PERSONAS_FALLBACK: Persona[] = [
     // 1
     {
         id: "p_detached_observer",
@@ -560,11 +564,82 @@ export const PERSONAS: Persona[] = [
     }
 ];
 
+// Active personas being used by the system
+let activePersonas: Persona[] = PERSONAS_FALLBACK;
+
+/**
+ * Get the currently active list of personas.
+ * Defaults to hardcoded fallback if not explicitly loaded from DB.
+ */
+export function getPersonas(): Persona[] {
+    return activePersonas;
+}
+
+/**
+ * Load personas from Supabase database.
+ * Database personas ALWAYS override code-based personas.
+ * Fallback is emergency-only.
+ * 
+ * @param supabaseClient Supabase client instance (any to avoid direct dependency)
+ */
+export async function loadPersonas(supabaseClient: any): Promise<Persona[]> {
+    try {
+        if (!supabaseClient) {
+            throw new Error("No Supabase client provided for persona loading");
+        }
+
+        const { data, error } = await supabaseClient
+            .from('personas')
+            .select('*')
+            .schema('internal')
+            .eq('is_active', true);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+            // Apply LLM Template Override if enabled
+            const processedPersonas = data.map((p: any) => {
+                const persona: Persona = {
+                    ...p,
+                    ranges: typeof p.ranges === 'string' ? JSON.parse(p.ranges) : p.ranges
+                };
+
+                // Local override for LLM templates (dev/experimental only)
+                if (process.env.USE_LOCAL_LLM_TEMPLATES === 'true') {
+                    const localFallback = PERSONAS_FALLBACK.find(f => f.id === p.id);
+                    if (localFallback?.llm_template) {
+                        persona.llm_template = localFallback.llm_template;
+                    }
+                }
+
+                return persona;
+            });
+
+            activePersonas = processedPersonas;
+            console.info(`✅ Successfully loaded ${activePersonas.length} personas from database.`);
+            return activePersonas;
+        } else {
+            throw new Error("No active personas found in database");
+        }
+    } catch (err: any) {
+        // Fallback occurred - log loudly in non-dev environments
+        const isDev = process.env.NODE_ENV === 'development';
+        if (!isDev) {
+            console.error("🚨 CRITICAL: Database persona load failed. Using emergency code fallback.", err);
+        } else {
+            console.warn("⚠️ Database persona load failed, using local fallbacks.", err.message);
+        }
+
+        activePersonas = PERSONAS_FALLBACK;
+        return activePersonas;
+    }
+}
+
 /**
  * Get persona by ID or MBTI code
  */
 export function getPersona(idOrMbti: string): Persona | null {
-    return PERSONAS.find(p => p.id === idOrMbti || p.mbti?.startsWith(idOrMbti)) || null;
+    return getPersonas().find(p => p.id === idOrMbti || p.mbti?.startsWith(idOrMbti)) || null;
 }
 
 // --- Matching algorithm utilities ---
@@ -586,7 +661,7 @@ function distanceFromRangeCenter(val: number, [min, max]: [number, number]) {
 export function mapProfileToPersona(profile: OCEAN) {
     // score each persona by trait hits and proximity
     // Exclude p_uniform_response from standard mapping (it's diagnostic only)
-    const candidates = PERSONAS.filter(p => p.id !== 'p_uniform_response');
+    const candidates = getPersonas().filter(p => p.id !== 'p_uniform_response');
 
     const scored = candidates.map((p) => {
         let hits = 0;
@@ -660,3 +735,6 @@ export function detectUniformResponses(answers: number[] | Record<string, number
     if (std < 0.5) return true; // extremely low variance on 1-5 scale
     return false;
 }
+
+// Deprecated: Use getPersonas() instead. Keeping for backward compatibility if needed internally.
+export const PERSONAS = PERSONAS_FALLBACK;

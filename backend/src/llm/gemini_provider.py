@@ -20,9 +20,9 @@ class GeminiProvider(LLMProviderBase):
     DEFAULT_MODEL = "gemini-2.0-flash"
     ALTERNATE_MODELS = ["gemini-2.0-flash-exp"]
     
-    # Retry configuration
-    MAX_RETRIES = 5
-    BACKOFF_SCHEDULE = [0.5, 1.0, 2.0, 4.0, 8.0]  # seconds
+    # Retry configuration - USER OPTIMIZED: Fail fast
+    MAX_RETRIES = 1
+    BACKOFF_SCHEDULE = [0.5]  # seconds
     
     def __init__(self, model_name: str = None, api_key: Optional[str] = None, alternate_models: Optional[List[str]] = None):
         """

@@ -70,8 +70,7 @@ class Config:
         """
         required_vars = {
             "SUPABASE_URL": cls.SUPABASE_URL,
-            "SUPABASE_KEY": cls.SUPABASE_KEY,
-            "OPENAI_API_KEY": cls.OPENAI_API_KEY
+            "SUPABASE_KEY": cls.SUPABASE_KEY
         }
         
         missing = [var for var, value in required_vars.items() if not value or value.startswith("your-") or value.startswith("sk-YOUR") or "your-project" in value]
@@ -101,10 +100,6 @@ class Config:
             return cls.SUPABASE_SERVICE_ROLE or cls.SUPABASE_KEY
         return cls.SUPABASE_KEY
     
-    @classmethod
-    def get_openai_key(cls) -> str:
-        """Get OpenAI API key"""
-        return cls.OPENAI_API_KEY
     
     @classmethod
     def get_gemini_key(cls) -> str:

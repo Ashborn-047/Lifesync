@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 from src.supabase_client import create_supabase_client
 from src.scorer.personality_scorer import PersonalityScorer
 from src.api.routes.questions import _load_questions  # Helper to resolve data path implicitly
+from src.ai.explanation_generator import generate_explanation_with_tone
 
 logger = logging.getLogger(__name__)
 
@@ -139,10 +140,26 @@ async def submit_assessment(payload: AssessmentRequest, background_tasks: Backgr
         
         # 5. Save Scores
         db.save_scores(assessment_id, scores, payload.responses)
-        
-        # 6. Update Profile (Latest Assessment)
-        if payload.user_id:
-            db.upsert_profile(payload.user_id, assessment_id)
+
+        # 🚀 PHASE 4: ASYNC PROCESSING (Non-blocking)
+        def process_post_submission():
+            try:
+                meta = scores.get('metadata', {})
+                db.save_telemetry(
+                    assessment_id=assessment_id,
+                    input_hash=meta.get('input_hash'),
+                    output_hash=meta.get('output_hash'),
+                    scoring_version=meta.get('scoring_version'),
+                    execution_path='python'
+                )
+                
+                # Update Profile (Latest Assessment)
+                if payload.user_id:
+                    db.upsert_profile(payload.user_id, assessment_id)
+            except Exception as async_err:
+                logger.warning(f"Post-submission background processing failed: {async_err}")
+
+        background_tasks.add_task(process_post_submission)
         
         # 6. Construct Response (Canonical)
         response_model = {
@@ -218,6 +235,19 @@ async def sync_assessments(payload: list[SyncRequest]):
             
             # 6. Save Scores
             db.save_scores(new_id, scores, item.responses)
+
+            # 🚀 PHASE 4: TELEMETRY (Non-blocking)
+            try:
+                meta = scores.get('metadata', {})
+                db.save_telemetry(
+                    assessment_id=new_id,
+                    input_hash=meta.get('input_hash'),
+                    output_hash=meta.get('output_hash'),
+                    scoring_version=meta.get('scoring_version'),
+                    execution_path='python'
+                )
+            except Exception as tel_err:
+                logger.warning(f"Telemetry persistence failed for sync: {tel_err}")
             
             # 7. Update Profile
             if item.user_id:
@@ -230,6 +260,123 @@ async def sync_assessments(payload: list[SyncRequest]):
             results.append({"offline_id": item.offline_id, "status": "failed", "error": str(e)})
             
     return {"synced": results}
+
+@router.get("/v1/assessments/{assessment_id}", response_model=AssessmentResponse)
+async def get_assessment(assessment_id: str):
+    """
+    Get assessment data by assessment_id.
+    """
+    try:
+        db = create_supabase_client()
+        # Fetch with full details
+        assessment = db.get_assessment(assessment_id)
+        if not assessment:
+            raise HTTPException(status_code=404, detail=f"Assessment {assessment_id} not found")
+        
+        # 🟢 Map trait_scores/facet_scores from DB (jsonb) to the expected response fields
+        traits = assessment.get("trait_scores", {})
+        facets = assessment.get("facet_scores", {})
+        
+        # Determine completion
+        is_complete = len(traits or {}) >= 5
+        
+        # 🟢 Reconstruct OCEAN for the canonical model
+        # The DB stores full names {"Openness": 0.8}, model expects {"O": 0.8}
+        ocean = {
+            "O": traits.get("Openness", 0.0) if traits else 0.0,
+            "C": traits.get("Conscientiousness", 0.0) if traits else 0.0,
+            "E": traits.get("Extraversion", 0.0) if traits else 0.0,
+            "A": traits.get("Agreeableness", 0.0) if traits else 0.0,
+            "N": traits.get("Neuroticism", 0.0) if traits else 0.0
+        }
+        
+        # Reconstruct metadata
+        metadata_raw = assessment.get("metadata", {})
+        metadata = {
+            "quiz_type": metadata_raw.get("quiz_type", "full"),
+            "engine_version": metadata_raw.get("engine_version", "2.0.0"),
+            "scoring_version": metadata_raw.get("scoring_version", "v1"),
+            "timestamp": metadata_raw.get("timestamp", 0.0)
+        }
+
+        # 🟢 Construct Response (Canonical)
+        response_model = {
+            "ocean": ocean,
+            "persona_id": assessment.get("persona_id", "unknown"),
+            "mbti_proxy": assessment.get("mbti_code") or "UNKN",
+            "confidence": assessment.get("confidence") or 0.0,
+            "metadata": metadata,
+            
+            # Additional Context for SDK
+            "assessment_id": assessment_id,
+            "traits": traits,
+            "facets": facets,
+            "dominant": {
+                "mbti_proxy": assessment.get("mbti_code"),
+                "personality_code": f"{assessment.get('mbti_code')}-X" if assessment.get('mbti_code') else "UNKN-X"
+            },
+            "is_complete": is_complete,
+            "traits_with_data": list(traits.keys()) if traits else []
+        }
+        
+        return response_model
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching assessment {assessment_id}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve assessment data")
+
+@router.post("/v1/assessments/{assessment_id}/generate_explanation")
+async def generate_explanation(assessment_id: str, payload: Optional[Dict[str, Any]] = None):
+    """
+    Generate LLM explanation for an assessment.
+    """
+    try:
+        db = create_supabase_client()
+        # Fetch assessment data with full detail for generator (use service role)
+        client = db.service_client or db.client
+        assessment_resp = client.table("personality_assessments").select("*").eq("id", assessment_id).execute()
+        
+        if not assessment_resp.data:
+            raise HTTPException(status_code=404, detail=f"Assessment {assessment_id} not found")
+        
+        assessment = assessment_resp.data[0]
+        traits = assessment.get("trait_scores", {})
+        facets = assessment.get("facet_scores", {})
+        confidence_val = assessment.get("confidence") or 0.0
+        mbti_code = assessment.get("mbti_code") or "UNKN"
+        
+        # Prepare context for generator
+        confidence_dict = {"global": confidence_val}
+        dominant_dict = {
+            "mbti_proxy": mbti_code,
+            "personality_code": assessment.get("personality_code") or f"{mbti_code}-X"
+        }
+        
+        provider = payload.get("provider") if payload else None
+        
+        logger.info(f"Generating AI explanation for assessment {assessment_id} (Provider: {provider or 'default'})")
+        
+        # Call generator
+        explanation = generate_explanation_with_tone(
+            traits=traits,
+            facets=facets,
+            confidence=confidence_dict,
+            dominant=dominant_dict,
+            provider=provider
+        )
+        
+        # Save generated explanation to DB
+        db.save_explanation(assessment_id, explanation)
+        
+        return explanation
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generating explanation for {assessment_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to generate AI insights: {str(e)}")
 
 @router.get("/v1/assessments/{user_id}/history")
 async def get_assessment_history(user_id: str):

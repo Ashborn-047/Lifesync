@@ -91,6 +91,7 @@ export interface ExplanationResponse {
   model_name?: string;
   tokens_used?: number;
   generation_time_ms?: number;
+  error?: string;
 }
 
 // Parsed explanation format for UI (new persona-based format)
@@ -107,6 +108,7 @@ export interface ParsedExplanation {
   summary: string;
   cautions: string[];
   tone: string;
+  error?: string;
 }
 
 export interface AssessmentHistoryItem {

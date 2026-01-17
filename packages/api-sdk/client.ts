@@ -14,16 +14,25 @@ import type {
   UserProfile,
 } from "@lifesync/types";
 
-const API_BASE_URL = "https://lifesync-production.up.railway.app";
-// const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5174";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 // Cache busting version - increment this whenever question logic changes
 const API_VERSION = '2024-11-17-v2';
+
+const SUPABASE_FUNCTION_URL = process.env.NEXT_PUBLIC_SUPABASE_FUNCTION_URL || "https://mszqmfxvjexfhvgchrti.supabase.co/functions/v1";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
+  },
+});
+
+const supabaseApi = axios.create({
+  baseURL: SUPABASE_FUNCTION_URL,
+  headers: {
+    "Content-Type": "application/json",
+    // Authorization will be handled by Supabase client or passed explicitly if needed
   },
 });
 
@@ -35,7 +44,7 @@ const handleApiError = (error: unknown): never => {
     // Network error (backend not reachable)
     if (axiosError.code === "ERR_NETWORK" || axiosError.message.includes("Network Error")) {
       throw new Error(
-        `Cannot connect to backend API at ${API_BASE_URL}. Please ensure the backend server is running on port 5174.`
+        `Cannot connect to backend API at ${API_BASE_URL}. Please ensure the backend server is running on port 8000.`
       );
     }
 
@@ -249,14 +258,30 @@ export const submitAssessment = async (
       quiz_type: quizType,
     };
 
-    const response = await api.post<CanonicalScoringResponse>(
-      "/v1/assessments",
-      requestBody
-    );
+    // 🚀 PHASE 4: EDGE FUNCTION FAST PATH
+    try {
+      console.info("⚡ Attempting scoring via Supabase Edge Function...");
+      const edgeResponse = await supabaseApi.post<CanonicalScoringResponse>(
+        "/score-assessment",
+        requestBody
+      );
 
-    // 🟢 Canonical Contract: Pass through backend response directly
-    // STRICT CHECK: Validate schema, NEVER mutate
-    return validateCanonicalResponse(response.data);
+      // If Edge Function returns success, it MUST have written to DB per contract
+      console.info("✅ Scoring completed via Edge Function.");
+      return validateCanonicalResponse(edgeResponse.data);
+    } catch (edgeError) {
+      // Edge failed partially or entirely -> Fail fast and fallback to Python
+      console.warn("⚠️ Edge Function fast-path failed. Falling back to Python API.", (edgeError as any).message);
+
+      const response = await api.post<CanonicalScoringResponse>(
+        "/v1/assessments",
+        requestBody
+      );
+
+      // 🟢 Canonical Contract: Pass through backend response directly
+      // STRICT CHECK: Validate schema, NEVER mutate
+      return validateCanonicalResponse(response.data);
+    }
   } catch (error) {
     // FALLBACK LOGIC: If backend is unreachable, use local scoring
     const axiosError = error as any;
@@ -380,6 +405,20 @@ export const generateExplanation = async (
   assessmentId: string,
   provider?: string
 ): Promise<ParsedExplanation> => {
+  // 🚀 FALLBACK: Cannot generate explanation for offline assessment until synced
+  if (assessmentId.startsWith("OFFLINE_")) {
+    console.info("⏳ Offline assessment: Explanation requires server sync.");
+    return {
+      summary: "Your personality profile has been saved locally. AI-generated insights will be fully available once your assessment is synced with our securely server.",
+      strengths: [],
+      growth_edges: [],
+      how_you_show_up: "",
+      tagline: "Sync pending...",
+      persona_title: "Analysis Pending",
+      vibe_summary: "Your deep analysis is waiting for a secure server connection.",
+    };
+  }
+
   try {
     const requestBody = provider ? { provider } : {};
     const response = await api.post<ExplanationResponse>(
@@ -404,6 +443,7 @@ export const generateExplanation = async (
         cautions: Array.isArray(data.growth_edges) ? data.growth_edges : (Array.isArray(data.challenges) ? data.challenges : []),
         tone: "Balanced",
         model_name: data.model_name,
+        error: data.error,
       };
     }
 
@@ -463,6 +503,7 @@ export const generateExplanation = async (
       cautions: cautions.length > 0 ? cautions : ["No specific challenges identified."],
       tone: tone,
       model_name: data.model_name,
+      error: data.error,
     };
   } catch (error) {
     throw handleApiError(error);

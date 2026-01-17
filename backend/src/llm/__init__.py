@@ -8,8 +8,7 @@ from .templates import SYSTEM_PROMPT, get_personality_explanation_prompt
 
 # New provider-based imports
 from .explanations import generate_personality_explanation
-from .llm_router import generate_explanation, get_provider_instance
-from .openai_provider import OpenAIProvider
+from .router import generate_explanation
 from .gemini_provider import GeminiProvider
 from .provider_base import LLMProviderBase
 
@@ -22,8 +21,6 @@ __all__ = [
     # New provider-based
     'generate_personality_explanation',
     'generate_explanation',
-    'get_provider_instance',
-    'OpenAIProvider',
     'GeminiProvider',
     'LLMProviderBase'
 ]

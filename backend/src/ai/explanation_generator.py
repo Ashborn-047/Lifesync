@@ -49,9 +49,8 @@ def generate_explanation_with_tone(
         RuntimeError: If LLM generation fails
         ValueError: If input data is invalid
     """
-    # Determine which provider to use
-    selected_provider = provider or get_provider()
-    logger.info(f"[LLM] Using provider: {selected_provider}")
+    # Step 0: Logging
+    logger.info(f"[LLM] Generating explanation using Gemini")
     
     # Step 1: Generate tone profile from traits
     # Convert full trait names to OCEAN codes for tone generator
@@ -76,22 +75,40 @@ def generate_explanation_with_tone(
     logger.info(f"[LLM] Mapped to persona: {persona.get('title')} (confidence: {persona_result.get('confidence')}%)")
 
     # Step 3: Generate explanation with tone profile and persona injected
-    # The router handles provider selection, fallback, and error handling
-    explanation = router_generate_explanation(
-        traits=traits,
-        facets=facets,
-        confidence=confidence,
-        dominant=dominant,
-        provider=provider,  # Pass through to router
-        system_prompt=system_prompt,
-        tone_profile=tone_profile,
-        persona=persona
-    )
+    try:
+        explanation = router_generate_explanation(
+            traits=traits,
+            facets=facets,
+            confidence=confidence,
+            dominant=dominant,
+            provider=None,  # Standardize on Gemini
+            system_prompt=system_prompt,
+            tone_profile=tone_profile,
+            persona=persona
+        )
+    except Exception as e:
+        logger.error(f"[LLM] Unexpected error in router: {e}")
+        explanation = {"error": str(e)}
     
-    # Check if router returned an error
+    # Check if router returned an error or failed
     if "error" in explanation:
-        logger.error(f"[LLM] Explanation generation failed: {explanation.get('error')}")
-        # Still return the explanation (with error) so caller can handle it
+        logger.warning(f"[LLM] AI generation failed, using static fallback for persona: {persona.get('title')}")
+        
+        # Build a static fallback from persona data
+        fallback = {
+            "persona_title": persona.get("title", "Personality Profile"),
+            "vibe_summary": persona.get("description", "A unique blend of personality traits."),
+            "strengths": persona.get("strengths", []),
+            "growth_edges": persona.get("growth", []),
+            "how_you_show_up": f"As {persona.get('title')}, your behavior is guided by {persona.get('tagline', 'your unique perspective')}.",
+            "tagline": persona.get("tagline", ""),
+            "is_fallback": True,
+            "error_note": explanation.get("error")
+        }
+        
+        # Preserve original error for debugging but return the fallback content
+        fallback["original_error"] = explanation.get("error")
+        explanation = fallback
     else:
         logger.info(f"[LLM] Explanation generated successfully using {explanation.get('model_name', 'unknown')}")
     

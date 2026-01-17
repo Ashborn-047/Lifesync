@@ -60,6 +60,40 @@ function ResultsPageContent() {
 
     const fetchData = async () => {
       try {
+        // 🚀 PHASE 4/5: Local Fallback Handling
+        if (assessmentId.startsWith("OFFLINE_")) {
+          console.info("🔍 Loading offline assessment from session storage");
+          const storedResult = sessionStorage.getItem("assessmentResult");
+          if (storedResult) {
+            const rawData = JSON.parse(storedResult);
+            if (rawData.assessment_id === assessmentId) {
+              // Transform CanonicalScoringResponse to AssessmentResult format
+              const data: AssessmentResult = {
+                assessment_id: rawData.assessment_id,
+                traits: {
+                  Openness: rawData.ocean?.O ?? 0,
+                  Conscientiousness: rawData.ocean?.C ?? 0,
+                  Extraversion: rawData.ocean?.E ?? 0,
+                  Agreeableness: rawData.ocean?.A ?? 0,
+                  Neuroticism: rawData.ocean?.N ?? 0,
+                },
+                facets: rawData.facets || {},
+                mbti: rawData.mbti_proxy || null,
+                has_complete_profile: true,
+                is_complete: true,
+                traits_with_data: ["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism"],
+                needs_retake: false,
+                needs_retake_reason: null,
+                explanation: null, // Will be generated later
+                answers: null,
+              };
+              setResult(data);
+              setLoading(false);
+              return;
+            }
+          }
+        }
+
         const data = await getAssessment(assessmentId);
         setResult(data);
         if (data.explanation) {
@@ -188,7 +222,11 @@ function ResultsPageContent() {
     }
 
     // 2. Standard Mapping
-    if (!result.traits?.Openness) return null;
+    // Fix: A score of 0 is valid. Check for existence, not truthiness.
+    const hasData = result.traits &&
+      result.traits.Openness !== null && result.traits.Openness !== undefined;
+
+    if (!hasData) return null;
     return mapProfileToPersona(oceanTraitsForPersona);
   })();
 
@@ -350,6 +388,12 @@ function ResultsPageContent() {
                 transition={{ duration: 0.5 }}
                 className="space-y-8"
               >
+                {explanation.error && (
+                  <div className="flex items-center gap-3 p-4 bg-red-950/30 border border-red-500/50 rounded-lg text-red-200 text-sm">
+                    <XCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                    <p>{explanation.error}</p>
+                  </div>
+                )}
                 {/* Persona Title */}
                 {explanation.persona_title ? (
                   <motion.div

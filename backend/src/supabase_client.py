@@ -7,6 +7,7 @@ import os
 from typing import Dict, Any, Optional, List
 from uuid import UUID
 from datetime import datetime
+import logging
 
 try:
     from supabase import create_client, Client
@@ -14,6 +15,8 @@ except ImportError:
     raise ImportError(
         "supabase package required. Install with: pip install supabase"
     )
+
+logger = logging.getLogger(__name__)
 
 
 class SupabaseClient:
@@ -70,7 +73,8 @@ class SupabaseClient:
         if user_id:
             data["user_id"] = user_id
             
-        result = self.client.table("personality_assessments").insert(data).execute()
+        client = self.service_client or self.client
+        result = client.table("personality_assessments").insert(data).execute()
         
         return result.data[0] if result.data else {}
     
@@ -98,7 +102,8 @@ class SupabaseClient:
             for q_id, value in answers.items()
         ]
         
-        result = self.client.table("personality_responses").insert(
+        client = self.service_client or self.client
+        result = client.table("personality_responses").insert(
             responses
         ).execute()
         
@@ -149,6 +154,7 @@ class SupabaseClient:
             # Canonical Fields Persistence
             "persona_id": scores.get("persona_id"),
             "confidence": scores.get("confidence"),
+            "scoring_version": meta.get("scoring_version", "v1"),
             
             # Metadata Persistence (Pack into a JSONB column if distinct columns missing)
             "metadata": {
@@ -157,13 +163,42 @@ class SupabaseClient:
                 "timestamp": meta.get("timestamp"),
                 "quiz_type": meta.get("quiz_type"),
                 "platform": meta.get("platform"),
-                "is_fallback": meta.get("is_fallback", False)
+                "is_fallback": meta.get("is_fallback", False),
+                "input_hash": meta.get("input_hash"),
+                "output_hash": meta.get("output_hash"),
+                "execution_path": meta.get("execution_path")
             }
         }
         
-        result = self.client.table("personality_assessments").update(
+        client = self.service_client or self.client
+        result = client.table("personality_assessments").update(
             update_data
         ).eq("id", assessment_id).execute()
+        
+        return result.data[0] if result.data else {}
+
+    def save_telemetry(
+        self,
+        assessment_id: str,
+        input_hash: str,
+        output_hash: str,
+        scoring_version: str,
+        execution_path: str = "python"
+    ) -> Dict[str, Any]:
+        """
+        Save parity telemetry for zero-diff validation.
+        """
+        telemetry_data = {
+            "assessment_id": assessment_id,
+            "input_hash": input_hash,
+            "output_hash": output_hash,
+            "scoring_version": scoring_version,
+            "execution_path": execution_path
+        }
+        
+        # internal schema usually requires explicit selection or service client
+        client = self.service_client or self.client
+        result = client.table("parity_telemetry").insert(telemetry_data).execute()
         
         return result.data[0] if result.data else {}
     
@@ -252,15 +287,33 @@ class SupabaseClient:
             "explanation_data": json.dumps(structured_data)  # Store as JSONB if column exists
         }
         
-        result = self.client.table("llm_explanations").insert(
-            explanation_data
-        ).execute()
+        client = self.service_client or self.client
+        try:
+            result = client.table("llm_explanations").insert(
+                explanation_data
+            ).execute()
+        except Exception as e:
+            # Fallback: if 'explanation_data' column is missing, try without it
+            # We check str(e) broadly as different versions of libraries or error responses might vary
+            error_msg = str(e).lower()
+            if "explanation_data" in error_msg or "pgrst204" in error_msg:
+                logger.warning("llm_explanations table missing 'explanation_data' column. Falling back to 'explanation' only.")
+                safe_data = {
+                    "assessment_id": assessment_id,
+                    "explanation": explanation_text
+                }
+                result = client.table("llm_explanations").insert(
+                    safe_data
+                ).execute()
+            else:
+                raise e
         
         return result.data[0] if result.data else {}
     
     def get_assessment(self, assessment_id: str) -> Optional[Dict[str, Any]]:
         """Get assessment by ID - optimized to fetch only needed columns"""
-        result = self.client.table("personality_assessments").select(
+        client = self.service_client or self.client
+        result = client.table("personality_assessments").select(
             "id,created_at,trait_scores,facet_scores,mbti_code"
         ).eq("id", assessment_id).execute()
         
@@ -268,7 +321,8 @@ class SupabaseClient:
     
     def get_scores(self, assessment_id: str) -> Optional[Dict[str, Any]]:
         """Get scores for an assessment"""
-        result = self.client.table("personality_scores").select("*").eq(
+        client = self.service_client or self.client
+        result = client.table("personality_scores").select("*").eq(
             "assessment_id", assessment_id
         ).execute()
         
@@ -276,7 +330,8 @@ class SupabaseClient:
     
     def get_explanation(self, assessment_id: str) -> Optional[Dict[str, Any]]:
         """Get explanation for an assessment"""
-        result = self.client.table("llm_explanations").select("*").eq(
+        client = self.service_client or self.client
+        result = client.table("llm_explanations").select("*").eq(
             "assessment_id", assessment_id
         ).execute()
         
@@ -308,7 +363,8 @@ class SupabaseClient:
         # Join with assessments to get the actual scoring data
         # Note: Supabase-py join syntax depends on FK setup. 
         # We select profiles.* and the nested assessment data.
-        result = self.client.table("profiles").select(
+        client = self.service_client or self.client
+        result = client.table("profiles").select(
             "*, current_assessment:personality_assessments(*)"
         ).eq("user_id", user_id).execute()
         
@@ -316,7 +372,8 @@ class SupabaseClient:
 
     def get_history(self, user_id: str, limit: int = 20) -> List[Dict[str, Any]]:
         """Get assessment history for user"""
-        result = self.client.table("personality_assessments").select(
+        client = self.service_client or self.client
+        result = client.table("personality_assessments").select(
             "id, created_at, quiz_type, mbti_code, persona_id, trait_scores, confidence"
         ).eq("user_id", user_id).order(
             "created_at", desc=True
