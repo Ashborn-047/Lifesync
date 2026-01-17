@@ -117,5 +117,6 @@ def root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Use port from config (which defaults to 8000 or the API_PORT/PORT env var)
+    uvicorn.run(app, host=config.API_HOST, port=config.API_PORT)
 

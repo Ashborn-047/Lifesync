@@ -53,7 +53,8 @@ class Config:
     
     # API Configuration
     API_HOST: str = os.getenv("API_HOST", "0.0.0.0")
-    API_PORT: int = int(os.getenv("API_PORT", "8000"))
+    # Railway/Heroku use PORT, local dev often uses API_PORT or 8000
+    API_PORT: int = int(os.getenv("PORT", os.getenv("API_PORT", "8000")))
     API_RELOAD: bool = os.getenv("API_RELOAD", "false").lower() == "true"
     
     # LLM Configuration
