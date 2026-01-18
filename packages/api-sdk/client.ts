@@ -497,3 +497,56 @@ export const downloadPDF = async (assessmentId: string): Promise<Blob> => {
   }
 };
 
+/**
+ * Sync offline results to backend
+ * 
+ * @param offlineItems List of offline assessment items
+ */
+export const syncOfflineResults = async (
+  offlineItems: Array<{
+    offline_id: string;
+    responses: Record<string, number> | AssessmentResponse[];
+    timestamp: number;
+    user_id?: string;
+    quiz_type?: string;
+  }>
+): Promise<{ synced: Array<{ offline_id: string; new_id?: string; status: string; error?: string }> }> => {
+  const syncedResults: any[] = [];
+
+  for (const item of offlineItems) {
+    try {
+      // Normalize responses to AssessmentResponse[] as expected by submitAssessment
+      let responsesArray: AssessmentResponse[] = [];
+      if (Array.isArray(item.responses)) {
+        responsesArray = item.responses;
+      } else {
+        responsesArray = Object.entries(item.responses).map(([question_id, response]) => ({
+          question_id,
+          response
+        }));
+      }
+
+      // submitAssessment(responses, userId, quizType)
+      const result = await submitAssessment(
+        responsesArray,
+        item.user_id || crypto.randomUUID(),
+        (item.quiz_type || 'full') as any
+      );
+
+      syncedResults.push({
+        offline_id: item.offline_id,
+        new_id: result.assessment_id,
+        status: "synced"
+      });
+    } catch (error: any) {
+      console.error(`Failed to sync offline item ${item.offline_id}:`, error);
+      syncedResults.push({
+        offline_id: item.offline_id,
+        status: "failed",
+        error: error.message || String(error)
+      });
+    }
+  }
+
+  return { synced: syncedResults };
+};
