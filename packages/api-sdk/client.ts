@@ -180,13 +180,6 @@ export const getQuestions = async (limit?: number): Promise<Question[]> => {
   }
 };
 
-// Import local scoring engine for fallback
-import {
-  computeProfile,
-  questions_180,
-  SCORING_VERSION
-} from "@lifesync/personality-engine";
-
 /**
  * Validate Canonical Scoring Response
  * STRICT RULE: Frontend must NEVER mutate or fix invalid data.
@@ -241,11 +234,7 @@ export const submitAssessment = async (
   userId: string = crypto.randomUUID(),
   quizType: "short" | "full180" | "quick" | "standard" | "full" = "full"
 ): Promise<CanonicalScoringResponse> => {
-  // Convert array format to map for local use (keep for legacy compatibility if needed)
-  const responsesMap = new Map<string, number>();
-  responses.forEach((r) => responsesMap.set(r.question_id, r.response));
-
-  // Convert array format to backend's expected dict format (Lifted scope for try/catch)
+  // Convert array format to map for internal processing
   const responsesDict: Record<string, number> = {};
   responses.forEach((r) => {
     responsesDict[r.question_id] = r.response;
@@ -258,102 +247,19 @@ export const submitAssessment = async (
       quiz_type: quizType,
     };
 
-    // 🚀 PHASE 4: EDGE FUNCTION FAST PATH
-    try {
-      console.info("⚡ Attempting scoring via Supabase Edge Function...");
-      const edgeResponse = await supabaseApi.post<CanonicalScoringResponse>(
-        "/score-assessment",
-        requestBody
-      );
+    // 🚀 PHASE 4: EDGE FUNCTION (Sole Authority)
+    console.info("⚡ Requesting scoring from Supabase Edge Function...");
+    const edgeResponse = await supabaseApi.post<CanonicalScoringResponse>(
+      "/score-assessment",
+      requestBody
+    );
 
-      // If Edge Function returns success, it MUST have written to DB per contract
-      console.info("✅ Scoring completed via Edge Function.");
-      return validateCanonicalResponse(edgeResponse.data);
-    } catch (edgeError) {
-      // Edge failed partially or entirely -> Fail fast and fallback to Python
-      console.warn("⚠️ Edge Function fast-path failed. Falling back to Python API.", (edgeError as any).message);
+    // If Edge Function returns success, it MUST have written to DB per contract
+    console.info("✅ Scoring completed via Edge Function.");
+    return validateCanonicalResponse(edgeResponse.data);
 
-      const response = await api.post<CanonicalScoringResponse>(
-        "/v1/assessments",
-        requestBody
-      );
-
-      // 🟢 Canonical Contract: Pass through backend response directly
-      // STRICT CHECK: Validate schema, NEVER mutate
-      return validateCanonicalResponse(response.data);
-    }
   } catch (error) {
-    // FALLBACK LOGIC: If backend is unreachable, use local scoring
-    const axiosError = error as any;
-    const isNetworkError = axios.isAxiosError(error) &&
-      (axiosError.code === "ERR_NETWORK" ||
-        axiosError.message?.includes("Network Error") ||
-        axiosError.response?.status === 500 ||
-        axiosError.response?.status === 503);
-
-    // DEBUG: Log error detection
-    // console.log("Fallback Check:", { isNetworkError, code: axiosError.code, msg: axiosError.message, isAxios: axios.isAxiosError(error) });
-
-    // Only fallback on network/server errors, NOT validation errors (400)
-    if (isNetworkError) {
-      console.warn("⚠️ Backend unreachable. Falling back to local scoring engine.");
-
-      try {
-        // Use verified local scoring engine
-        // Must cast questions_180 to as any to avoid type mismatch between packages
-        const localResult = computeProfile(responsesDict, (questions_180 as any).questions);
-
-        // Generate a temporary offline ID
-        const offlineId = `OFFLINE_${Date.now()}_${userId.substring(0, 8)}`;
-
-        const safeScore = (val: any) => {
-          if (val === undefined || val === null || typeof val !== 'number' || Number.isNaN(val)) return 0.0;
-          return Math.max(0, Math.min(1, val / 100.0));
-
-        };
-
-        // 🟢 Canonical Contract Configuration for Fallback
-        const fallbackResult: CanonicalScoringResponse = {
-          assessment_id: offlineId,
-          ocean: {
-            O: safeScore(localResult.ocean?.O),
-            C: safeScore(localResult.ocean?.C),
-            E: safeScore(localResult.ocean?.E),
-            A: safeScore(localResult.ocean?.A),
-            N: safeScore(localResult.ocean?.N),
-          },
-          persona_id: localResult.mbti_type ? localResult.mbti_type.toLowerCase() : "unknown",
-          mbti_proxy: localResult.mbti_type || "UNKN",
-          confidence: 0.5, // Fallback engine doesn't calculate global confidence easily yet, default to moderate
-          metadata: {
-            quiz_type: "full180", // Default fallback assumption
-            engine_version: "2.0.0-fallback",
-            scoring_version: SCORING_VERSION,
-            timestamp: Date.now() / 1000,
-            is_fallback: true,
-            platform: "web" // Assumption, caller can override if needed but this is client SDK
-          },
-          // Optional legacy fields for UI compatibility if needed by consumer
-          facets: localResult.facets,
-          traits_detailed: {
-            "Openness": localResult.ocean.O,
-            "Conscientiousness": localResult.ocean.C,
-            "Extraversion": localResult.ocean.E,
-            "Agreeableness": localResult.ocean.A,
-            "Neuroticism": localResult.ocean.N
-          }
-        };
-
-        console.info("✅ Generated offline score (Canonical):", fallbackResult.mbti_proxy);
-
-        // STRICT CHECK: Even fallback must pass the validator
-        return validateCanonicalResponse(fallbackResult);
-      } catch (fallbackError) {
-        console.error("❌ Fallback scoring failed:", fallbackError);
-        // If even fallback fails, throw original error
-      }
-    }
-
+    console.error("❌ Assessment submission failed:", error);
     throw handleApiError(error);
   }
 };
@@ -591,44 +497,3 @@ export const downloadPDF = async (assessmentId: string): Promise<Blob> => {
   }
 };
 
-/**
- * Sync offline results to backend
- * 
- * @param offlineItems List of offline assessment items
- */
-export const syncOfflineResults = async (
-  offlineItems: Array<{
-    offline_id: string;
-    responses: Record<string, number> | Array<{ question_id: string, response: number }>;
-    timestamp: number;
-    user_id?: string;
-    quiz_type?: string;
-  }>
-): Promise<{ synced: Array<{ offline_id: string; new_id?: string; status: string; error?: string }> }> => {
-  try {
-    // Normalize responses format
-    const payload = offlineItems.map(item => {
-      let responsesDict: Record<string, number> = {};
-      if (Array.isArray(item.responses)) {
-        item.responses.forEach(r => responsesDict[r.question_id] = r.response);
-      } else {
-        responsesDict = item.responses;
-      }
-      return {
-        offline_id: item.offline_id,
-        responses: responsesDict,
-        timestamp: item.timestamp,
-        user_id: item.user_id,
-        quiz_type: item.quiz_type || 'full'
-      };
-    });
-
-    const response = await api.post<{ synced: any[] }>(
-      "/v1/assessments/sync",
-      payload
-    );
-    return response.data;
-  } catch (error) {
-    throw handleApiError(error);
-  }
-};
