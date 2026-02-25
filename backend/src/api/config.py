@@ -60,7 +60,47 @@ class Config:
     # LLM Configuration
     DEFAULT_LLM_MODEL: str = os.getenv("DEFAULT_LLM_MODEL", "gpt-4")
     DEFAULT_GEMINI_MODEL: str = os.getenv("DEFAULT_GEMINI_MODEL", "gemini-2.0-flash-exp")
-    
+
+    # CORS Configuration
+    ALLOWED_ORIGINS: str = os.getenv("ALLOWED_ORIGINS", "")
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development").lower()
+
+    @classmethod
+    def get_allowed_origins(cls) -> list:
+        """
+        Get list of allowed CORS origins.
+
+        In development, automatically includes localhost origins.
+        In production, uses ALLOWED_ORIGINS environment variable.
+
+        Returns:
+            List of allowed origin URLs
+        """
+        origins = []
+
+        # Parse ALLOWED_ORIGINS from environment (comma-separated)
+        if cls.ALLOWED_ORIGINS:
+            origins = [origin.strip() for origin in cls.ALLOWED_ORIGINS.split(",") if origin.strip()]
+
+        # In development, automatically allow localhost origins
+        if cls.ENVIRONMENT == "development":
+            dev_origins = [
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "http://127.0.0.1:3000",
+                "http://127.0.0.1:3001",
+            ]
+            # Add dev origins if not already present
+            for origin in dev_origins:
+                if origin not in origins:
+                    origins.append(origin)
+
+        # If no origins specified and not in development, default to strict mode (no origins)
+        if not origins and cls.ENVIRONMENT != "development":
+            return []
+
+        return origins
+
     @classmethod
     def validate(cls) -> tuple:
         """

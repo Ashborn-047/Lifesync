@@ -5,15 +5,20 @@ Handles assessment submission, scoring, and persistence
 
 import logging
 from typing import Dict, Any, Optional
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Request
 from pydantic import BaseModel, Field
 import logging
 
 from src.supabase_client import create_supabase_client
 from src.ai.explanation_generator import generate_explanation_with_tone
+from src.db.quota import quota_tracker
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+# Get limiter from app state - will be available at runtime
+def get_limiter(request: Request):
+    return request.app.state.limiter
 
 class OceanScores(BaseModel):
     O: float
@@ -121,10 +126,22 @@ async def get_assessment(assessment_id: str):
         raise HTTPException(status_code=500, detail="Failed to retrieve assessment data")
 
 @router.post("/v1/assessments/{assessment_id}/generate_explanation")
-async def generate_explanation(assessment_id: str, payload: Optional[Dict[str, Any]] = None):
+async def generate_explanation(req: Request, assessment_id: str, payload: Optional[Dict[str, Any]] = None):
     """
     Generate LLM explanation for an assessment.
+    Rate limit: 10 generations per day and 2 per hour per IP address.
     """
+    # Apply rate limits (both day and hour limits)
+    limiter = get_limiter(req)
+    await limiter.check_for_limits(req, "10/day")
+    await limiter.check_for_limits(req, "2/hour")
+
+    # Check quota tracker (using IP address as identifier)
+    user_identifier = req.client.host if req.client else "unknown"
+    has_quota, error_msg = quota_tracker.check_quota(user_identifier)
+    if not has_quota:
+        raise HTTPException(status_code=429, detail=error_msg)
+
     try:
         db = create_supabase_client()
         # Fetch assessment data with full detail for generator (use service role)
@@ -175,7 +192,10 @@ async def generate_explanation(assessment_id: str, payload: Optional[Dict[str, A
         
         # Save generated explanation to DB
         db.save_explanation(assessment_id, explanation)
-        
+
+        # Record successful usage
+        quota_tracker.record_usage(user_identifier)
+
         return explanation
 
     except HTTPException:
