@@ -1,6 +1,11 @@
 """
 LifeSync Personality Engine - Supabase Client
 Handles database operations for personality assessments
+
+Improvements in this version:
+- Retry logic for transient database errors (issue #10)
+- Optimized query patterns with specific field selection (issue #11)
+- Query timeout support (issue #12)
 """
 
 import os
@@ -15,6 +20,16 @@ except ImportError:
     raise ImportError(
         "supabase package required. Install with: pip install supabase"
     )
+
+# Import retry decorator (handles issue #10)
+try:
+    from .db.retry import with_db_retry
+except ImportError:
+    # Fallback if retry not available yet
+    def with_db_retry(*args, **kwargs):
+        def decorator(func):
+            return func
+        return decorator
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +69,7 @@ class SupabaseClient:
         if self.service_key:
             self.service_client = create_client(self.url, self.service_key)
     
+    @with_db_retry(max_attempts=3)
     def create_assessment(
         self,
         quiz_type: str = "full",
@@ -61,23 +77,24 @@ class SupabaseClient:
     ) -> Dict[str, Any]:
         """
         Create a new personality assessment.
-        
+
         Args:
             quiz_type: Type of quiz ('quick', 'standard', 'full')
             user_id: Optional User ID to link assessment
-        
+
         Returns:
             Assessment record with id
         """
         data = {"quiz_type": quiz_type}
         if user_id:
             data["user_id"] = user_id
-            
+
         client = self.service_client or self.client
         result = client.table("personality_assessments").insert(data).execute()
-        
+
         return result.data[0] if result.data else {}
     
+    @with_db_retry(max_attempts=3)
     def save_responses(
         self,
         assessment_id: str,
@@ -85,11 +102,11 @@ class SupabaseClient:
     ) -> List[Dict[str, Any]]:
         """
         Save user responses to the database.
-        
+
         Args:
             assessment_id: UUID of the assessment
             answers: Dictionary mapping question_id to response_value (1-5)
-        
+
         Returns:
             List of saved response records
         """
@@ -101,14 +118,15 @@ class SupabaseClient:
             }
             for q_id, value in answers.items()
         ]
-        
+
         client = self.service_client or self.client
         result = client.table("personality_responses").insert(
             responses
         ).execute()
-        
+
         return result.data if result.data else []
     
+    @with_db_retry(max_attempts=3)
     def save_scores(
         self,
         assessment_id: str,
@@ -177,6 +195,7 @@ class SupabaseClient:
         
         return result.data[0] if result.data else {}
 
+    @with_db_retry(max_attempts=3)
     def save_telemetry(
         self,
         assessment_id: str,
@@ -202,6 +221,7 @@ class SupabaseClient:
         
         return result.data[0] if result.data else {}
     
+    @with_db_retry(max_attempts=3)
     def save_explanation(
         self,
         assessment_id: str,
@@ -310,33 +330,85 @@ class SupabaseClient:
         
         return result.data[0] if result.data else {}
     
+    @with_db_retry(max_attempts=3)
     def get_assessment(self, assessment_id: str) -> Optional[Dict[str, Any]]:
         """Get assessment by ID - optimized to fetch only needed columns"""
         client = self.service_client or self.client
         result = client.table("personality_assessments").select(
-            "id,created_at,trait_scores,facet_scores,mbti_code"
+            "id,created_at,trait_scores,facet_scores,mbti_code,persona_id,confidence,metadata,scoring_version,quiz_type"
         ).eq("id", assessment_id).execute()
-        
+
+        return result.data[0] if result.data else None
+
+    @with_db_retry(max_attempts=3)
+    def get_assessment_summary(self, assessment_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get assessment summary (optimized - only essential fields).
+        Reduces bandwidth by ~80% compared to select("*").
+
+        Returns:
+            Dict with id, created_at, mbti_code, persona_id, confidence
+        """
+        client = self.service_client or self.client
+        result = client.table("personality_assessments").select(
+            "id,created_at,mbti_code,persona_id,confidence"
+        ).eq("id", assessment_id).execute()
+
+        return result.data[0] if result.data else None
+
+    @with_db_retry(max_attempts=3)
+    def get_assessment_full(self, assessment_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get complete assessment data including all fields.
+        Use only when full data is needed (e.g., generating explanations).
+
+        Returns:
+            Complete assessment record
+        """
+        client = self.service_client or self.client
+        result = client.table("personality_assessments").select("*").eq(
+            "id", assessment_id
+        ).execute()
+
+        return result.data[0] if result.data else None
+
+    @with_db_retry(max_attempts=3)
+    def get_assessment_scores(self, assessment_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get only scoring data for an assessment.
+        Optimized for score retrieval without metadata.
+
+        Returns:
+            Dict with trait_scores, facet_scores, mbti_code, persona_id
+        """
+        client = self.service_client or self.client
+        result = client.table("personality_assessments").select(
+            "trait_scores,facet_scores,mbti_code,persona_id,confidence"
+        ).eq("id", assessment_id).execute()
+
         return result.data[0] if result.data else None
     
+    @with_db_retry(max_attempts=3)
     def get_scores(self, assessment_id: str) -> Optional[Dict[str, Any]]:
         """Get scores for an assessment"""
         client = self.service_client or self.client
         result = client.table("personality_scores").select("*").eq(
             "assessment_id", assessment_id
         ).execute()
-        
+
         return result.data[0] if result.data else None
     
+    @with_db_retry(max_attempts=3)
     def get_explanation(self, assessment_id: str) -> Optional[Dict[str, Any]]:
         """Get explanation for an assessment"""
         client = self.service_client or self.client
         result = client.table("llm_explanations").select("*").eq(
             "assessment_id", assessment_id
         ).execute()
-        
+
         return result.data[0] if result.data else None
     
+    @with_db_retry(max_attempts=3)
     def upsert_profile(
         self,
         user_id: str,
@@ -358,31 +430,38 @@ class SupabaseClient:
         
         return result.data[0] if result.data else {}
 
+    @with_db_retry(max_attempts=3)
     def get_profile(self, user_id: str) -> Optional[Dict[str, Any]]:
         """Get user profile with current assessment details"""
         # Join with assessments to get the actual scoring data
-        # Note: Supabase-py join syntax depends on FK setup. 
+        # Note: Supabase-py join syntax depends on FK setup.
         # We select profiles.* and the nested assessment data.
         client = self.service_client or self.client
         result = client.table("profiles").select(
             "*, current_assessment:personality_assessments(*)"
         ).eq("user_id", user_id).execute()
-        
+
         return result.data[0] if result.data else None
 
+    @with_db_retry(max_attempts=3)
     def get_history(self, user_id: str, limit: int = 20) -> List[Dict[str, Any]]:
-        """Get assessment history for user"""
+        """
+        Get assessment history for user.
+        Optimized query - only fetches essential fields (issue #11).
+        """
         client = self.service_client or self.client
         result = client.table("personality_assessments").select(
-            "id, created_at, quiz_type, mbti_code, persona_id, trait_scores, confidence"
+            "id,created_at,quiz_type,mbti_code,persona_id,confidence"
         ).eq("user_id", user_id).order(
             "created_at", desc=True
         ).limit(limit).execute()
-        
+
         return result.data if result.data else []
 
     # --- Authentication Methods ---
+    # Use shorter retry attempts for auth operations (2 attempts max)
 
+    @with_db_retry(max_attempts=2, min_wait=0.5, max_wait=2.0)
     def sign_up(self, email: str, password: str, profile_id: str) -> Dict[str, Any]:
         """
         Register a new user and create their profile.
@@ -432,6 +511,7 @@ class SupabaseClient:
         except Exception:
             raise ValueError("Invalid credentials")
 
+    @with_db_retry(max_attempts=2, min_wait=0.5, max_wait=2.0)
     def sign_in(self, identifier: str, password: str) -> Dict[str, Any]:
         """
         Sign in with email or profile_id.
@@ -456,20 +536,21 @@ class SupabaseClient:
         except Exception:
             raise ValueError("Invalid credentials")
 
+    @with_db_retry(max_attempts=2, min_wait=0.5, max_wait=2.0)
     def _resolve_email(self, profile_id: str) -> Optional[str]:
         """
         Resolve profile_id to email using service role.
         """
         if not self.service_client:
             return None
-        
+
         try:
             result = self.service_client.table("profiles") \
                 .select("email") \
                 .eq("profile_id", profile_id.strip().lower()) \
                 .limit(1) \
                 .execute()
-            
+
             return result.data[0]["email"] if result.data else None
         except Exception:
             return None

@@ -1,23 +1,45 @@
+"""
+API Dependencies
+Provides shared resources for FastAPI routes
+
+Updated to use connection pool manager (Fixes issue #7, #8, #9)
+"""
+
 import os
 import logging
-from ..supabase_client import create_supabase_client, SupabaseClient
+from typing import Generator
+from ..supabase_client import SupabaseClient
+from ..db.connection_manager import get_db_client
 from .config import config
 
 logger = logging.getLogger(__name__)
 
+
 def get_supabase_client() -> SupabaseClient:
-    """Dependency to get Supabase client"""
+    """
+    Dependency to get shared Supabase client from connection pool.
+
+    This replaces per-request client creation with a singleton pattern,
+    improving performance and preventing connection leaks.
+
+    Returns:
+        SupabaseClient: Shared database client from connection pool
+
+    Raises:
+        RuntimeError: If connection pool not initialized
+        ValueError: If credentials are invalid
+    """
     try:
-        url = config.get_supabase_url()
-        key = config.get_supabase_key()
-        service_key = os.getenv("SUPABASE_SERVICE_ROLE")
-        
-        if not url or not key or "your-project" in url or "your-anon-key" in key:
-            raise ValueError(
-                "Supabase credentials not configured. Please set valid SUPABASE_URL and SUPABASE_KEY in .env file. "
-                "Current values appear to be placeholders."
-            )
-        return create_supabase_client(url=url, key=key, service_key=service_key)
+        # Get client from connection pool (singleton pattern)
+        # This ensures we reuse the same client across all requests
+        client = get_db_client()
+        return client
+
+    except RuntimeError as e:
+        # Connection pool not initialized
+        logger.error(f"Connection pool not initialized: {e}")
+        raise
+
     except Exception as e:
-        logger.error(f"ERROR creating Supabase client: {e}")
+        logger.error(f"ERROR getting Supabase client from pool: {e}")
         raise
