@@ -6,10 +6,11 @@ Handles user authentication and account management.
 import logging
 from typing import Optional, Dict, Any
 from fastapi import APIRouter, HTTPException, Depends, Request
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from src.supabase_client import SupabaseClient
 from src.api.dependencies import get_supabase_client
+from src.utils.validators import sanitize_text
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +27,19 @@ class SignupRequest(BaseModel):
     password: str
     profile_id: str = Field(..., description="Lowercase username/handle")
 
+    @field_validator('profile_id')
+    @classmethod
+    def sanitize_profile_id(cls, v: str) -> str:
+        return sanitize_text(v)
+
 class LoginRequest(BaseModel):
     identifier: str = Field(..., description="Email or profile_id")
     password: str
+
+    @field_validator('identifier')
+    @classmethod
+    def sanitize_identifier(cls, v: str) -> str:
+        return sanitize_text(v)
 
 class ResetPasswordRequest(BaseModel):
     email: EmailStr

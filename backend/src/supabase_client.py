@@ -10,6 +10,8 @@ Improvements in this version:
 
 import os
 from typing import Dict, Any, Optional, List
+from uuid import UUID
+from datetime import datetime
 import logging
 
 try:
@@ -31,6 +33,7 @@ except ImportError:
 
 from .api.config import config
 from .db.timeout import TimeoutContext
+from .db.cache import cached, assessment_cache, history_cache, invalidate_assessment_cache, invalidate_history_cache
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +97,9 @@ class SupabaseClient:
 
         with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
             result = client.table("personality_assessments").insert(data).execute()
+
+        if result.data and user_id:
+            invalidate_history_cache(user_id)
 
         return result.data[0] if result.data else {}
     
@@ -199,6 +205,10 @@ class SupabaseClient:
             result = client.table("personality_assessments").update(
                 update_data
             ).eq("id", assessment_id).execute()
+
+        if result.data:
+            # Invalidate cache for this assessment
+            invalidate_assessment_cache(assessment_id)
         
         return result.data[0] if result.data else {}
 
@@ -342,6 +352,7 @@ class SupabaseClient:
         return result.data[0] if result.data else {}
     
     @with_db_retry(max_attempts=3)
+    @cached(assessment_cache)
     def get_assessment(self, assessment_id: str) -> Optional[Dict[str, Any]]:
         """Get assessment by ID - optimized to fetch only needed columns"""
         client = self.service_client or self.client
@@ -354,6 +365,7 @@ class SupabaseClient:
         return result.data[0] if result.data else None
 
     @with_db_retry(max_attempts=3)
+    @cached(assessment_cache)
     def get_assessment_summary(self, assessment_id: str) -> Optional[Dict[str, Any]]:
         """
         Get assessment summary (optimized - only essential fields).
@@ -470,21 +482,42 @@ class SupabaseClient:
         return result.data[0] if result.data else None
 
     @with_db_retry(max_attempts=3)
-    def get_history(self, user_id: str, limit: int = 20) -> List[Dict[str, Any]]:
+    # Cache key must include pagination params
+    @cached(history_cache)
+    def get_history(self, user_id: str, page: int = 1, page_size: int = 20) -> Dict[str, Any]:
         """
-        Get assessment history for user.
-        Optimized query - only fetches essential fields (issue #11).
+        Get assessment history for user with pagination.
+
+        Returns:
+            Dict with 'data' (list) and 'meta' (pagination info)
         """
         client = self.service_client or self.client
 
+        # Calculate offset
+        offset = (page - 1) * page_size
+
         with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+            # Get total count
+            count_result = client.table("personality_assessments").select(
+                "id", count="exact"
+            ).eq("user_id", user_id).execute()
+            total = count_result.count if count_result.count is not None else 0
+
+            # Get page data
             result = client.table("personality_assessments").select(
                 "id,created_at,quiz_type,mbti_code,persona_id,confidence"
             ).eq("user_id", user_id).order(
                 "created_at", desc=True
-            ).limit(limit).execute()
+            ).range(offset, offset + page_size - 1).execute()
 
-        return result.data if result.data else []
+        data = result.data if result.data else []
+
+        return {
+            "data": data,
+            "page": page,
+            "page_size": page_size,
+            "total": total
+        }
 
     # --- Authentication Methods ---
     # Use shorter retry attempts for auth operations (2 attempts max)
@@ -527,7 +560,7 @@ class SupabaseClient:
                         self.service_client.table("profiles").insert(profile_data).execute()
                     else:
                         self.client.table("profiles").insert(profile_data).execute()
-            except Exception:
+            except Exception as e:
                 # Treat signup as failed if profile creation fails
                 if self.service_client:
                     try:
@@ -625,4 +658,3 @@ def create_supabase_client(
         SupabaseClient instance
     """
     return SupabaseClient(url=url, key=key, service_key=service_key)
-

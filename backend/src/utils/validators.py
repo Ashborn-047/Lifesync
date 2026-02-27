@@ -90,6 +90,26 @@ def validate_assessment_id(assessment_id: str) -> Tuple[bool, str]:
     return validate_user_id(assessment_id)  # Same format as user ID
 
 
+def sanitize_text(text: str) -> str:
+    """
+    Sanitize text input by removing HTML tags and trimming whitespace.
+
+    Args:
+        text: Input text
+
+    Returns:
+        Sanitized text
+    """
+    if not text:
+        return ""
+
+    # Remove HTML tags using regex
+    clean_text = re.sub(r'<[^>]+>', '', text)
+
+    # Trim whitespace
+    return clean_text.strip()
+
+
 def sanitize_answers(answers: Dict[str, int]) -> Dict[str, int]:
     """
     Sanitize and normalize answer dictionary.
