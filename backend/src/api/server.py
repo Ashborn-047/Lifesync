@@ -23,22 +23,19 @@ load_dotenv()
 async def check_for_limits(self, request: Request, limit_string: str):
     """
     Check if rate limit is exceeded for the given limit string.
-
-    Args:
-        request: FastAPI Request object
-        limit_string: Rate limit string (e.g. "10/day")
-
-    Raises:
-        RateLimitExceeded: If rate limit is exceeded
+    Endpoint-specific namespacing is applied to prevent shared limits across routes.
     """
-    # Get the key (IP address)
-    key = self._key_func(request)
-
+    # Get the base key (IP address)
+    key = get_remote_address(request)
+    # Add namespace to separate different endpoints
+    namespace = request.url.path
+    full_key = f"{key}:{namespace}"
+    
     # Parse the limit string
     limit_item = parse(limit_string)
-
+    
     # Check if limit is exceeded
-    if not self.limiter.hit(limit_item, key):
+    if not self.limiter.hit(limit_item, full_key):
          # Wrapper to add error_message attribute which slowapi expects
          class LimitWrapper:
              def __init__(self, limit, error_message):
