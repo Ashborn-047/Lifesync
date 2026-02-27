@@ -39,15 +39,17 @@ async def test_request_timeout_middleware():
         # or rely on starlette's TestClient support for async apps.
 
         # Let's try mocking the sleep to be longer than the timeout
-        with patch("src.api.config.config.REQUEST_TIMEOUT", 0.1):
-             response = client.get("/test/slow-endpoint")
+        # Manually override config instead of patching (avoids import path issues)
+        config.REQUEST_TIMEOUT = 0.1
 
-             # Assert 408 Timeout
-             assert response.status_code == 408
-             assert response.json() == {
-                 "error": "Request Timeout",
-                 "detail": f"Request took longer than 0.1 seconds to process"
-             }
+        response = client.get("/test/slow-endpoint")
+
+        # Assert 408 Timeout
+        assert response.status_code == 408
+        assert response.json() == {
+             "error": "Request Timeout",
+             "detail": f"Request took longer than 0.1 seconds to process"
+        }
 
     finally:
         # Restore config

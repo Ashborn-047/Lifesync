@@ -142,6 +142,10 @@ class TestResourceLeakPrevention:
             ))
             mock_create.return_value = mock_client
 
+            # Initialize pool
+            manager = ConnectionManager()
+            manager.initialize(url="https://test.supabase.co", key="test-key")
+
             # Simulate multiple requests
             clients = []
             for _ in range(100):

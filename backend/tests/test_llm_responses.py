@@ -55,7 +55,7 @@ class TestLLMResponses(unittest.TestCase):
             "personality_code": "INFP-B"
         }
     
-    @patch('src.llm.llm_client.openai.OpenAI')
+    @patch('openai.OpenAI')
     def test_llm_client_initialization(self, mock_openai):
         """Test LLM client initialization"""
         mock_client_instance = MagicMock()
@@ -70,7 +70,7 @@ class TestLLMResponses(unittest.TestCase):
         self.assertEqual(client.model_name, "gpt-4")
         self.assertEqual(client.api_key, "test-key")
     
-    @patch('src.llm.llm_client.openai.OpenAI')
+    @patch('openai.OpenAI')
     def test_generate_explanation_mock(self, mock_openai):
         """Test explanation generation with mocked LLM response"""
         # Mock OpenAI client
@@ -121,7 +121,7 @@ class TestLLMResponses(unittest.TestCase):
         self.assertEqual(call_args.kwargs["model"], "gpt-4")
         self.assertEqual(call_args.kwargs["response_format"]["type"], "json_object")
     
-    @patch('src.llm.llm_client.openai.OpenAI')
+    @patch('openai.OpenAI')
     def test_generate_explanation_invalid_json(self, mock_openai):
         """Test handling of invalid JSON response"""
         # Mock OpenAI client
@@ -150,7 +150,7 @@ class TestLLMResponses(unittest.TestCase):
                 dominant=self.sample_dominant
             )
     
-    @patch('src.llm.llm_client.openai.OpenAI')
+    @patch('openai.OpenAI')
     def test_generate_explanation_api_error(self, mock_openai):
         """Test handling of API errors"""
         # Mock OpenAI client

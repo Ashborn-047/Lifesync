@@ -19,25 +19,25 @@ class TestExplanationRoute(unittest.TestCase):
     
     def setUp(self):
         self.client = TestClient(app)
-        self.assessment_id = "test-assessment-id"
+        # Use a valid UUID for validation passing
+        self.assessment_id = "123e4567-e89b-12d3-a456-426614174000"
         
-    @patch("src.api.routes.assessments.create_supabase_client")
+    @patch("src.api.dependencies.get_db_client")
     @patch("src.api.routes.assessments.generate_explanation_with_tone")
-    def test_generate_explanation_success(self, mock_generate, mock_create_db):
+    def test_generate_explanation_success(self, mock_generate, mock_get_db):
         # 1. Mock DB
         mock_db = MagicMock()
-        mock_create_db.return_value = mock_db
+        mock_get_db.return_value = mock_db
         
-        # Mock assessment data
-        mock_query = MagicMock()
-        mock_query.eq.return_value.execute.return_value = MagicMock(data=[{
+        # Mock assessment data returned by get_assessment_full
+        mock_db.get_assessment_full.return_value = {
             "id": self.assessment_id,
             "trait_scores": {"Openness": 0.8},
             "facet_scores": {"Imagination": 0.7},
             "confidence": 0.9,
-            "mbti_code": "INTJ"
-        }])
-        mock_db.client.table.return_value.select.return_value = mock_query
+            "mbti_code": "INTJ",
+            "personality_code": "INTJ-A"
+        }
         
         # 2. Mock Generator
         mock_generate.return_value = {
@@ -61,17 +61,17 @@ class TestExplanationRoute(unittest.TestCase):
         # Verify DB save was called
         mock_db.save_explanation.assert_called_once()
         
-    @patch("src.api.routes.assessments.create_supabase_client")
-    def test_generate_explanation_not_found(self, mock_create_db):
+    @patch("src.api.dependencies.get_db_client")
+    def test_generate_explanation_not_found(self, mock_get_db):
         mock_db = MagicMock()
-        mock_create_db.return_value = mock_db
+        mock_get_db.return_value = mock_db
         
-        # Mock assessment not found
-        mock_query = MagicMock()
-        mock_query.eq.return_value.execute.return_value = MagicMock(data=[])
-        mock_db.client.table.return_value.select.return_value = mock_query
+        # Mock assessment not found (return None)
+        mock_db.get_assessment_full.return_value = None
         
-        response = self.client.post(f"/v1/assessments/invalid-id/generate_explanation")
+        # Use valid UUID but one that doesn't exist in DB
+        valid_uuid_not_found = "123e4567-e89b-12d3-a456-426614174999"
+        response = self.client.post(f"/v1/assessments/{valid_uuid_not_found}/generate_explanation")
         
         self.assertEqual(response.status_code, 404)
 

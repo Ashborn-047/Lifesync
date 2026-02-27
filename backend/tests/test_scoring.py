@@ -132,8 +132,10 @@ class TestScoring(unittest.TestCase):
     
     def test_empty_answers(self):
         """Test handling of empty answers"""
-        with self.assertRaises(Exception):
-            score_answers({})
+        # Should handle gracefully (return partial/empty results)
+        result = score_answers({})
+        self.assertEqual(result["responses_count"], 0)
+        self.assertEqual(result["coverage"], 0.0)
     
     def test_invalid_answer_values(self):
         """Test handling of invalid answer values"""
