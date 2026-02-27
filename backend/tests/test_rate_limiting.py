@@ -129,11 +129,11 @@ class TestLLMGenerationRateLimit:
 
         # 1st and 2nd should pass
         for i in range(2):
-            response = client.post("/v1/assessments/test-123/generate_explanation")
+            response = client.post("/v1/assessments/550e8400-e29b-41d4-a716-446655440000/generate_explanation")
             assert response.status_code == 200
             
         # 3rd should be rate limited (by 2/hour limit)
-        response = client.post("/v1/assessments/test-123/generate_explanation")
+        response = client.post("/v1/assessments/550e8400-e29b-41d4-a716-446655440000/generate_explanation")
         assert response.status_code == 429
 
 

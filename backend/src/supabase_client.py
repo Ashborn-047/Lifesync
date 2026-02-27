@@ -31,6 +31,7 @@ except ImportError:
 
 from .api.config import config
 from .db.timeout import TimeoutContext
+from .db.cache import cached, assessment_cache, history_cache, invalidate_assessment_cache, invalidate_history_cache
 
 logger = logging.getLogger(__name__)
 
@@ -200,6 +201,9 @@ class SupabaseClient:
                 update_data
             ).eq("id", assessment_id).execute()
         
+        # Invalidate cache on update
+        invalidate_assessment_cache(assessment_id)
+        
         return result.data[0] if result.data else {}
 
     @with_db_retry(max_attempts=3)
@@ -339,8 +343,12 @@ class SupabaseClient:
             else:
                 raise e
         
+        # Invalidate cache when new explanation is added
+        invalidate_assessment_cache(assessment_id)
+        
         return result.data[0] if result.data else {}
     
+    @cached(assessment_cache)
     @with_db_retry(max_attempts=3)
     def get_assessment(self, assessment_id: str) -> Optional[Dict[str, Any]]:
         """Get assessment by ID - optimized to fetch only needed columns"""
@@ -469,6 +477,7 @@ class SupabaseClient:
 
         return result.data[0] if result.data else None
 
+    @cached(history_cache)
     @with_db_retry(max_attempts=3)
     def get_history(self, user_id: str, limit: int = 20) -> List[Dict[str, Any]]:
         """

@@ -10,6 +10,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 from src.supabase_client import SupabaseClient
 from src.api.dependencies import get_supabase_client
+from src.utils.validators import sanitize_text
 
 logger = logging.getLogger(__name__)
 
@@ -48,8 +49,13 @@ async def signup(req: Request, request: SignupRequest, db: SupabaseClient = Depe
     # Apply rate limit
     limiter = get_limiter(req)
     await limiter.check_for_limits(req, "5/hour")
+    
+    # Sanitize inputs
+    clean_email = sanitize_text(str(request.email))
+    clean_profile_id = sanitize_text(request.profile_id).lower()
+    
     try:
-        result = db.sign_up(request.email, request.password, request.profile_id)
+        result = db.sign_up(clean_email, request.password, clean_profile_id)
         return {
             "message": "User created successfully", 
             "user_id": result["user"].id
@@ -71,8 +77,12 @@ async def login(req: Request, request: LoginRequest, db: SupabaseClient = Depend
     limiter = get_limiter(req)
     await limiter.check_for_limits(req, "10/hour")
     await limiter.check_for_limits(req, "3/minute")
+    
+    # Sanitize identifier
+    clean_identifier = sanitize_text(request.identifier)
+    
     try:
-        result = db.sign_in(request.identifier, request.password)
+        result = db.sign_in(clean_identifier, request.password)
         return {
             "message": "Login successful", 
             "session": result["session"]

@@ -101,7 +101,7 @@ def test_supabase_client_applies_timeout():
             db = SupabaseClient(url="https://test.supabase.co", key="test")
 
             # Call a method (e.g., get_assessment)
-            db.get_assessment("test-id")
+            db.get_assessment("550e8400-e29b-41d4-a716-446655440000")
 
             # Verify TimeoutContext was initialized with DATABASE_QUERY_TIMEOUT
             MockTimeoutContext.assert_called_with(config.DATABASE_QUERY_TIMEOUT)

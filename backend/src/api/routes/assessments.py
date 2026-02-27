@@ -15,6 +15,11 @@ from src.supabase_client import SupabaseClient
 from src.api.dependencies import get_supabase_client
 from src.ai.explanation_generator import generate_explanation_with_tone
 from src.db.quota import quota_tracker
+from src.utils.validators import validate_assessment_id, sanitize_answers, validate_answers
+from src.llm.circuit_breaker import CircuitBreaker, with_circuit_breaker, CircuitBreakerOpenException
+
+# Initialize Circuit Breaker for LLM calls
+llm_circuit_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=60.0, name="llm_explanation")
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -62,6 +67,11 @@ async def get_assessment(assessment_id: str, db: SupabaseClient = Depends(get_su
 
     Uses optimized query to fetch only needed fields (issue #11).
     """
+    # Validate assessment_id format
+    is_valid, error = validate_assessment_id(assessment_id)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error)
+
     try:
         # Use optimized get_assessment method (fetches specific fields only)
         assessment = db.get_assessment(assessment_id)
@@ -140,6 +150,11 @@ async def generate_explanation(
     Generate LLM explanation for an assessment.
     Rate limit: 10 generations per day and 2 per hour per IP address.
     """
+    # Validate assessment_id format
+    is_valid, error = validate_assessment_id(assessment_id)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error)
+
     # Apply rate limits (both day and hour limits)
     limiter = get_limiter(req)
     await limiter.check_for_limits(req, "10/day")
@@ -186,14 +201,23 @@ async def generate_explanation(
         
         logger.info(f"Generating AI explanation for assessment {assessment_id} (Provider: {provider or 'default'})")
         
-        # Call generator
-        explanation = generate_explanation_with_tone(
-            traits=traits,
-            facets=facets,
-            confidence=confidence_dict,
-            dominant=dominant_dict,
-            provider=provider
-        )
+        
+        # Call generator with circuit breaker protection
+        @with_circuit_breaker(llm_circuit_breaker)
+        async def protected_generate():
+            return generate_explanation_with_tone(
+                traits=traits,
+                facets=facets,
+                confidence=confidence_dict,
+                dominant=dominant_dict,
+                provider=provider
+            )
+        
+        try:
+            explanation = await protected_generate()
+        except CircuitBreakerOpenException as e:
+            logger.warning(f"Circuit breaker open for explanation: {e}")
+            raise HTTPException(status_code=503, detail="AI service temporarily unavailable. Please try again later.")
         
         # Save generated explanation to DB
         db.save_explanation(assessment_id, explanation)

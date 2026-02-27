@@ -15,6 +15,9 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from limits import parse
+from src.api.middleware.logging_middleware import LoggingMiddleware
+from src.db.cache import get_cache_stats
+from contextlib import asynccontextmanager
 
 # Load environment variables from .env file
 load_dotenv()
@@ -66,11 +69,48 @@ from .config import config
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
-# Initialize FastAPI app
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Lifespan event handler for FastAPI application.
+    Handles startup and shutdown logic.
+    """
+    # --- Startup ---
+    logger.info("LifeSync Personality Engine starting up...")
+    try:
+        manager = ConnectionManager()
+        url = config.get_supabase_url()
+        key = config.get_supabase_key()
+        service_key = os.getenv("SUPABASE_SERVICE_ROLE")
+
+        if not url or not key or "your-project" in url or "your-anon-key" in key:
+            logger.warning("Supabase credentials not configured properly.")
+        else:
+            manager.initialize(url=url, key=key, service_key=service_key)
+            logger.info("Database connection pool initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize connection pool: {e}")
+
+    logger.info(f"Server started on {config.API_HOST}:{config.API_PORT}")
+    
+    yield
+    
+    # --- Shutdown ---
+    logger.info("LifeSync Personality Engine shutting down...")
+    try:
+        manager = ConnectionManager()
+        manager.close()
+        logger.info("Database connection pool closed successfully")
+    except Exception as e:
+        logger.error(f"Error during shutdown: {e}")
+    logger.info("Shutdown complete")
+
+# Initialize FastAPI app with lifespan
 app = FastAPI(
     title="LifeSync Personality Engine API",
     description="API for personality assessment scoring and explanation generation",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Add rate limiter to app state
@@ -100,6 +140,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Structured Logging Middleware
+app.add_middleware(LoggingMiddleware)
 
 # GZip compression middleware (performance optimization)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
@@ -134,61 +177,40 @@ async def timeout_middleware(request: Request, call_next):
 
 
 # Lifecycle Management (Fixes issue #9)
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     """
-    Initialize resources on application startup.
-
-    - Initializes database connection pool
-    - Verifies database connectivity
-    - Logs startup information
+    Lifespan event handler for FastAPI application.
+    Handles startup and shutdown logic.
     """
+    # --- Startup ---
     logger.info("LifeSync Personality Engine starting up...")
-
     try:
-        # Initialize connection pool
         manager = ConnectionManager()
         url = config.get_supabase_url()
         key = config.get_supabase_key()
         service_key = os.getenv("SUPABASE_SERVICE_ROLE")
 
         if not url or not key or "your-project" in url or "your-anon-key" in key:
-            logger.warning(
-                "Supabase credentials not configured properly. "
-                "Database operations will fail until credentials are set."
-            )
+            logger.warning("Supabase credentials not configured properly.")
         else:
             manager.initialize(url=url, key=key, service_key=service_key)
             logger.info("Database connection pool initialized successfully")
-
     except Exception as e:
         logger.error(f"Failed to initialize connection pool: {e}")
-        # Don't fail startup - allow health checks to work
-        # Individual requests will fail with appropriate errors
 
     logger.info(f"Server started on {config.API_HOST}:{config.API_PORT}")
-    logger.info("Startup complete")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """
-    Cleanup resources on application shutdown.
-
-    - Closes database connection pool
-    - Logs shutdown information
-    """
+    
+    yield
+    
+    # --- Shutdown ---
     logger.info("LifeSync Personality Engine shutting down...")
-
     try:
-        # Close connection pool
         manager = ConnectionManager()
         manager.close()
         logger.info("Database connection pool closed successfully")
-
     except Exception as e:
         logger.error(f"Error during shutdown: {e}")
-
     logger.info("Shutdown complete")
 
 
@@ -220,6 +242,19 @@ except Exception as e:
     logger.error(f"Failed to create global Supabase client: {e}")
     supabase = None
 
+
+@app.get("/metrics")
+def get_metrics():
+    """
+    Get performance metrics and cache stats.
+    """
+    return {
+        "status": "healthy",
+        "cache": get_cache_stats(),
+        "database": {
+            "initialized": ConnectionManager().is_initialized()
+        }
+    }
 
 # Health check endpoint
 @app.get("/health")
