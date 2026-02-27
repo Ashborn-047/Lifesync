@@ -20,9 +20,9 @@ class GeminiProvider(LLMProviderBase):
     DEFAULT_MODEL = "gemini-2.0-flash"
     ALTERNATE_MODELS = ["gemini-2.0-flash-exp"]
     
-    # Retry configuration
-    MAX_RETRIES = 5
-    BACKOFF_SCHEDULE = [0.5, 1.0, 2.0, 4.0, 8.0]  # seconds
+    # Retry configuration - USER OPTIMIZED: Fail fast
+    MAX_RETRIES = 1
+    BACKOFF_SCHEDULE = [0.5]  # seconds
     
     def __init__(self, model_name: str = None, api_key: Optional[str] = None, alternate_models: Optional[List[str]] = None):
         """
@@ -193,7 +193,8 @@ class GeminiProvider(LLMProviderBase):
         confidence: dict,
         dominant: dict,
         system_prompt: Optional[str] = None,
-        tone_profile: Optional[dict] = None
+        tone_profile: Optional[dict] = None,
+        persona: Optional[dict] = None
     ) -> dict:
         """
         Generate explanation with proper error handling and safe JSON parsing.
@@ -204,7 +205,7 @@ class GeminiProvider(LLMProviderBase):
         
         system_prompt = system_prompt or SYSTEM_PROMPT
         user_prompt = get_personality_explanation_prompt(
-            traits, facets, confidence, dominant, tone_profile=tone_profile
+            traits, facets, confidence, dominant, tone_profile=tone_profile, persona=persona
         )
         
         start_time = time.time()

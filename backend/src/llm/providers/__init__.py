@@ -8,7 +8,6 @@ LifeSync Personality Engine - LLM Providers
 # Use: from src.llm.providers.grok_provider import GrokProvider
 
 from .provider_failure import ProviderFailure
-from .grok_provider import GrokProvider
 
-__all__ = ['ProviderFailure', 'GrokProvider']
+__all__ = ['ProviderFailure']
 

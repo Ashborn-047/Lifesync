@@ -4,13 +4,22 @@ Handles 180-question OCEAN assessment with 30 facets
 """
 
 import json
+import hashlib
 from typing import Dict, List, Tuple, Optional, Union
 from collections import defaultdict
+from src.config.constants import SCORING_VERSION
 
 
 class PersonalityScorer:
     """Score personality responses and return OCEAN traits + facets"""
     
+    @staticmethod
+    def compute_hash(data: Dict) -> str:
+        """Generating deterministic hash for parity telemetry"""
+        # Sort keys and remove separators to match JS JSON.stringify() behavior
+        msg = json.dumps(data, sort_keys=True, separators=(',', ':'))
+        return hashlib.sha256(msg.encode()).hexdigest()
+
     # Minimum questions per trait to generate a valid score
     MIN_QUESTIONS_PER_TRAIT = 3
     
@@ -98,6 +107,7 @@ class PersonalityScorer:
         traits_with_data = []
         
         for trait_code in ['O', 'C', 'E', 'A', 'N']:
+            print(f"DEBUG: Trait {trait_code} - Sum: {trait_sums[trait_code]}, Weight: {trait_weights[trait_code]}")
             question_count = trait_weights.get(trait_code, 0)
             
             if question_count >= self.MIN_QUESTIONS_PER_TRAIT:
@@ -143,7 +153,48 @@ class PersonalityScorer:
         top_facets = self._get_top_facets(valid_facets, n=5) if valid_facets else []
         
         # Build result with proper null handling
+        # 🟢 Canonical Contract Alignment
+        ocean_scores = {
+            'O': round(trait_scores['O'], 3) if trait_scores['O'] is not None else 0.0,
+            'C': round(trait_scores['C'], 3) if trait_scores['C'] is not None else 0.0,
+            'E': round(trait_scores['E'], 3) if trait_scores['E'] is not None else 0.0,
+            'A': round(trait_scores['A'], 3) if trait_scores['A'] is not None else 0.0,
+            'N': round(trait_scores['N'], 3) if trait_scores['N'] is not None else 0.0
+        }
+
+        # Calculate input/output hashes for parity telemetry
+        input_hash = self.compute_hash(responses)
+        output_data = {
+            **ocean_scores,
+            'mbti': mbti_code,
+            'version': SCORING_VERSION
+        }
+        output_hash = self.compute_hash(output_data)
+
+        # Calculate global confidence (Average of non-zero trait confidences)
+        conf_values = [v for v in trait_confidence.values() if v > 0]
+        global_confidence = round(sum(conf_values) / len(conf_values), 2) if conf_values else 0.0
+
+        # Persona ID (Derive from MBTI or fallback)
+        persona_id = mbti_code.lower() if mbti_code and mbti_code != "UNKN" else "unknown"
+
         result = {
+            # Canonical Contract Fields
+            'ocean': ocean_scores,
+            'persona_id': persona_id,
+            'mbti_proxy': mbti_code,
+            'confidence': global_confidence,
+            'metadata': {
+                'quiz_type': 'full180' if len(responses) >= 60 else 'quick', # Simple heuristic for now
+                'engine_version': '2.0.0',
+                'scoring_version': SCORING_VERSION,
+                'timestamp': 0, # Will be filled by API route
+                'input_hash': input_hash,
+                'output_hash': output_hash,
+                'execution_path': 'python'
+            },
+            
+            # Legacy/Detailed Fields (still useful for internal logic or detailed views)
             'traits': {
                 'Openness': round(trait_scores['O'], 3) if trait_scores['O'] is not None else None,
                 'Conscientiousness': round(trait_scores['C'], 3) if trait_scores['C'] is not None else None,

@@ -1,0 +1,32 @@
+name: Parity Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  parity-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm install --legacy-peer-deps
+
+    - name: Build Packages
+      run: npm run build --workspaces --if-present
+
+    - name: Run Personality Engine Tests
+      run: npm test --workspace @lifesync/personality-engine
+
+    - name: Run Parity Script
+      run: node packages/personality-engine/scripts/compareProfiles.js

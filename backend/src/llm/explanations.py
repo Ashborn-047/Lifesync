@@ -14,7 +14,8 @@ def generate_personality_explanation(
     dominant: Dict[str, str],
     provider: Optional[str] = None,
     system_prompt: Optional[str] = None,
-    tone_profile: Optional[Dict[str, Any]] = None
+    tone_profile: Optional[Dict[str, Any]] = None,
+    persona: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """
     Generate personality explanation using the configured LLM provider.
@@ -30,6 +31,8 @@ def generate_personality_explanation(
         dominant: Dominant profile information (MBTI proxy, neuroticism level, etc.)
         provider: Optional provider name ("openai" or "gemini"). If None, uses configured default.
         system_prompt: Optional custom system prompt
+        tone_profile: Optional tone profile
+        persona: Optional persona object
     
     Returns:
         Dictionary containing:
@@ -61,6 +64,7 @@ def generate_personality_explanation(
         dominant=dominant,
         provider=provider,
         system_prompt=system_prompt,
-        tone_profile=tone_profile
+        tone_profile=tone_profile,
+        persona=persona
     )
 

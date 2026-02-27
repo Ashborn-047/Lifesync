@@ -1,0 +1,9 @@
+# Railway Configuration for LifeSync Backend
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "python -m src.api.server"
+healthcheckPath = "/health"
+restartPolicyType = "on_failure"

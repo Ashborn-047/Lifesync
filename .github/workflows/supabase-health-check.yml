@@ -1,0 +1,34 @@
+name: Supabase Health Check
+
+on:
+  schedule:
+    # Run at 12:30 PM IST and 12:30 AM IST (6:30 UTC and 18:30 UTC)
+    - cron: '30 6,18 * * *'
+    # Run at 1:30 PM IST every Friday, Saturday, and Sunday (7:30 UTC)
+    - cron: '30 7 * * 5,6,0'
+  workflow_dispatch:
+    # Allow manual triggering
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run Health Check Script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python backend/scripts/supabase_health_check.py

@@ -10,6 +10,8 @@ from ..config.llm_provider import get_provider
 from .tone_generator import generate_tone_safe
 from ..llm.templates import _convert_traits_to_codes
 
+from ..personas.persona_registry import map_profile_to_persona
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,9 +28,10 @@ def generate_explanation_with_tone(
     
     This function:
     1. Generates tone profile from traits
-    2. Injects tone guidance into LLM prompt
-    3. Generates explanation using configured LLM provider
-    4. Returns structured explanation
+    2. Maps profile to Persona
+    3. Injects tone and persona guidance into LLM prompt
+    4. Generates explanation using configured LLM provider
+    5. Returns structured explanation
     
     Args:
         traits: OCEAN trait scores (0-1 scale) with full names
@@ -46,9 +49,8 @@ def generate_explanation_with_tone(
         RuntimeError: If LLM generation fails
         ValueError: If input data is invalid
     """
-    # Determine which provider to use
-    selected_provider = provider or get_provider()
-    logger.info(f"[LLM] Using provider: {selected_provider}")
+    # Step 0: Logging
+    logger.info(f"[LLM] Generating explanation using Gemini")
     
     # Step 1: Generate tone profile from traits
     # Convert full trait names to OCEAN codes for tone generator
@@ -58,27 +60,61 @@ def generate_explanation_with_tone(
     tone_profile = generate_tone_safe(trait_codes)
     logger.debug(f"[LLM] Generated tone profile: {len(tone_profile.get('style', []))} style descriptors")
     
-    # Step 2: Generate explanation with tone profile injected
-    # The router handles provider selection, fallback, and error handling
-    explanation = router_generate_explanation(
-        traits=traits,
-        facets=facets,
-        confidence=confidence,
-        dominant=dominant,
-        provider=provider,  # Pass through to router
-        system_prompt=system_prompt,
-        tone_profile=tone_profile
-    )
+    # Step 2: Map to Persona
+    # Convert 0-1 traits to 0-100 for mapping
+    ocean_profile = {
+        "openness": traits.get("Openness", 0) * 100,
+        "conscientiousness": traits.get("Conscientiousness", 0) * 100,
+        "extraversion": traits.get("Extraversion", 0) * 100,
+        "agreeableness": traits.get("Agreeableness", 0) * 100,
+        "neuroticism": traits.get("Neuroticism", 0) * 100
+    }
     
-    # Check if router returned an error
+    persona_result = map_profile_to_persona(ocean_profile)
+    persona = persona_result.get("persona")
+    logger.info(f"[LLM] Mapped to persona: {persona.get('title')} (confidence: {persona_result.get('confidence')}%)")
+
+    # Step 3: Generate explanation with tone profile and persona injected
+    try:
+        explanation = router_generate_explanation(
+            traits=traits,
+            facets=facets,
+            confidence=confidence,
+            dominant=dominant,
+            provider=None,  # Standardize on Gemini
+            system_prompt=system_prompt,
+            tone_profile=tone_profile,
+            persona=persona
+        )
+    except Exception as e:
+        logger.error(f"[LLM] Unexpected error in router: {e}")
+        explanation = {"error": str(e)}
+    
+    # Check if router returned an error or failed
     if "error" in explanation:
-        logger.error(f"[LLM] Explanation generation failed: {explanation.get('error')}")
-        # Still return the explanation (with error) so caller can handle it
+        logger.warning(f"[LLM] AI generation failed, using static fallback for persona: {persona.get('title')}")
+        
+        # Build a static fallback from persona data
+        fallback = {
+            "persona_title": persona.get("title", "Personality Profile"),
+            "vibe_summary": persona.get("description", "A unique blend of personality traits."),
+            "strengths": persona.get("strengths", []),
+            "growth_edges": persona.get("growth", []),
+            "how_you_show_up": f"As {persona.get('title')}, your behavior is guided by {persona.get('tagline', 'your unique perspective')}.",
+            "tagline": persona.get("tagline", ""),
+            "is_fallback": True,
+            "error_note": explanation.get("error")
+        }
+        
+        # Preserve original error for debugging but return the fallback content
+        fallback["original_error"] = explanation.get("error")
+        explanation = fallback
     else:
         logger.info(f"[LLM] Explanation generated successfully using {explanation.get('model_name', 'unknown')}")
     
-    # Add tone profile to explanation metadata
+    # Add tone profile and persona to explanation metadata
     explanation["tone_profile"] = tone_profile
+    explanation["persona"] = persona
     
     return explanation
 

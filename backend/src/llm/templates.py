@@ -68,7 +68,8 @@ def get_personality_explanation_prompt(
     facets: dict, 
     confidence: dict, 
     dominant: dict,
-    tone_profile: dict = None
+    tone_profile: dict = None,
+    persona: dict = None
 ) -> str:
     """
     Generate a user prompt for personality explanation with tone guidance.
@@ -79,6 +80,7 @@ def get_personality_explanation_prompt(
         confidence: Confidence scores for traits and facets
         dominant: Dominant profile (MBTI proxy, neuroticism level, personality code)
         tone_profile: Optional tone profile from tone generator
+        persona: Optional persona object from persona registry
     
     Returns:
         Formatted prompt string with tone guidance
@@ -124,30 +126,37 @@ def get_personality_explanation_prompt(
                 for facet_name, score in top_facets
             ])
     
-    # Get MBTI type for persona mapping
-    mbti_type = dominant.get("mbti_proxy", "UNKNOWN")
-    
-    # MBTI to Persona mapping
-    persona_mapping = {
-        "INFJ": "The Insightful Guide",
-        "INFP": "The Imaginative Healer",
-        "INTJ": "The Strategic Visionary",
-        "INTP": "The Curious Architect",
-        "ENFJ": "The Visionary Mentor",
-        "ENFP": "The Creative Catalyst",
-        "ENTJ": "The Commanding Architect",
-        "ENTP": "The Trailblazing Inventor",
-        "ISFJ": "The Quiet Guardian",
-        "ISFP": "The Gentle Creator",
-        "ISTJ": "The Grounded Strategist",
-        "ISTP": "The Analytical Explorer",
-        "ESFJ": "The Warm Connector",
-        "ESFP": "The Radiant Performer",
-        "ESTJ": "The Organized Leader",
-        "ESTP": "The Energetic Improviser"
-    }
-    
-    persona_title = persona_mapping.get(mbti_type, f"The {mbti_type}")
+    # Determine Persona details
+    if persona:
+        persona_title = persona.get("title", "Unknown Persona")
+        persona_tagline = persona.get("tagline", "")
+        persona_desc = persona.get("description", "")
+        llm_template_instruction = persona.get("llm_template", "")
+    else:
+        # Fallback to MBTI mapping if no persona provided (legacy support)
+        mbti_type = dominant.get("mbti_proxy", "UNKNOWN")
+        persona_mapping = {
+            "INFJ": "The Insightful Guide",
+            "INFP": "The Imaginative Healer",
+            "INTJ": "The Strategic Visionary",
+            "INTP": "The Curious Architect",
+            "ENFJ": "The Visionary Mentor",
+            "ENFP": "The Creative Catalyst",
+            "ENTJ": "The Commanding Architect",
+            "ENTP": "The Trailblazing Inventor",
+            "ISFJ": "The Quiet Guardian",
+            "ISFP": "The Gentle Creator",
+            "ISTJ": "The Grounded Strategist",
+            "ISTP": "The Analytical Explorer",
+            "ESFJ": "The Warm Connector",
+            "ESFP": "The Radiant Performer",
+            "ESTJ": "The Organized Leader",
+            "ESTP": "The Energetic Improviser"
+        }
+        persona_title = persona_mapping.get(mbti_type, f"The {mbti_type}")
+        persona_tagline = ""
+        persona_desc = ""
+        llm_template_instruction = ""
     
     # Build the complete prompt
     prompt = """You are generating a personality profile for LifeSync, a self-development app.
@@ -159,9 +168,14 @@ Your goal: Make the user FEEL understood. Keep it short, warm, and emotionally r
     if tone_text:
         prompt += tone_text
     
-    prompt += f"""User's MBTI type: {mbti_type}
-Persona title: {persona_title}
+    prompt += f"""Persona title: {persona_title}
+"""
+    if persona_tagline:
+        prompt += f"Tagline: {persona_tagline}\n"
+    if persona_desc:
+        prompt += f"Description: {persona_desc}\n"
 
+    prompt += f"""
 Trait scores:
 {trait_scores_text}
 
@@ -185,31 +199,20 @@ Your goals:
 - Provide an identity they can *see themselves in*.
 
 You are given:
-- MBTI type: {mbti_type}
 - Persona title: {persona_title}
 - Trait scores (OCEAN): See above
-- Strengths list: (derive from trait scores)
-- Challenges list: (derive from trait scores)
+- Strengths list: (derive from trait scores and persona)
+- Challenges list: (derive from trait scores and persona)
 
-Convert the MBTI type into a human-friendly persona name using this mapping:
-INFJ = The Insightful Guide
-INFP = The Imaginative Healer
-INTJ = The Strategic Visionary
-INTP = The Curious Architect
-ENFJ = The Visionary Mentor
-ENFP = The Creative Catalyst
-ENTJ = The Commanding Architect
-ENTP = The Trailblazing Inventor
-ISFJ = The Quiet Guardian
-ISFP = The Gentle Creator
-ISTJ = The Grounded Strategist
-ISTP = The Analytical Explorer
-ESFJ = The Warm Connector
-ESFP = The Radiant Performer
-ESTJ = The Organized Leader
-ESTP = The Energetic Improviser
+"""
 
-Format your final output EXACTLY like this:
+    if llm_template_instruction:
+        prompt += f"""Specific Instruction for this Persona:
+{llm_template_instruction}
+
+"""
+
+    prompt += f"""Format your final output EXACTLY like this:
 
 1. **Persona Title** (big + bold)
    Use: "{persona_title}"
