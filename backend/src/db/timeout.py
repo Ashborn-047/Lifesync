@@ -11,7 +11,8 @@ from typing import Callable, Any, Optional
 logger = logging.getLogger(__name__)
 
 
-class TimeoutError(Exception):
+# Use builtin TimeoutError to ensure compatibility with other libraries
+class TimeoutError(TimeoutError):
     """Exception raised when a database operation times out."""
     pass
 

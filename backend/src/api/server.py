@@ -4,20 +4,53 @@ REST API for personality assessment scoring and explanation generation
 """
 
 import os
-from typing import Dict, Any, Optional, List
-from datetime import datetime
-from fastapi import FastAPI, HTTPException, Depends, Request
+import asyncio
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import Response, JSONResponse
-from pydantic import BaseModel, Field
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 from dotenv import load_dotenv
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from limits import parse
 
 # Load environment variables from .env file
 load_dotenv()
+
+# Monkey-patch Limiter class to add check_for_limits method
+async def check_for_limits(self, request: Request, limit_string: str):
+    """
+    Check if rate limit is exceeded for the given limit string.
+
+    Args:
+        request: FastAPI Request object
+        limit_string: Rate limit string (e.g. "10/day")
+
+    Raises:
+        RateLimitExceeded: If rate limit is exceeded
+    """
+    # Get the key (IP address)
+    key = self._key_func(request)
+
+    # Parse the limit string
+    limit_item = parse(limit_string)
+
+    # Check if limit is exceeded
+    if not self.limiter.hit(limit_item, key):
+         # Wrapper to add error_message attribute which slowapi expects
+         class LimitWrapper:
+             def __init__(self, limit, error_message):
+                 self.limit = limit
+                 self.error_message = error_message
+             def __getattr__(self, name):
+                 return getattr(self.limit, name)
+
+         wrapped = LimitWrapper(limit_item, f"Rate limit exceeded: {limit_string}")
+         raise RateLimitExceeded(wrapped)
+
+Limiter.check_for_limits = check_for_limits
 
 # Configure logging for local development
 import logging
@@ -26,27 +59,11 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-from ..scorer import score_answers, validate_responses as validate_response_balance
-from ..ai.explanation_generator import generate_explanation_with_tone
-from ..ai.pdf_generator import generate_pdf
-from ..supabase_client import create_supabase_client, SupabaseClient
-from ..llm.router import generate_explanation as router_generate_explanation
+from ..supabase_client import create_supabase_client
 from .routes import questions as questions_router, assessments as assessments_router, profiles as profiles_router, auth as auth_router
-from typing import List
 from ..db.connection_manager import ConnectionManager
 
 logger = logging.getLogger(__name__)
-from ..utils import (
-    validate_quiz_type,
-    validate_answers,
-    validate_user_id,
-    validate_assessment_id,
-    sanitize_answers,
-    log_api_request,
-    Timer,
-    log_scoring_metrics,
-    log_llm_metrics
-)
 from .config import config
 
 # Initialize rate limiter
@@ -89,6 +106,34 @@ app.add_middleware(
 
 # GZip compression middleware (performance optimization)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# Request Timeout Middleware (Fixes issue #12)
+@app.middleware("http")
+async def timeout_middleware(request: Request, call_next):
+    """
+    Middleware to enforce global request timeout.
+
+    Returns 408 Request Timeout if processing exceeds configured duration.
+    """
+    # Get timeout from config, default to 60s
+    timeout = getattr(config, "REQUEST_TIMEOUT", 60.0)
+
+    try:
+        # Apply timeout to request processing
+        return await asyncio.wait_for(call_next(request), timeout=timeout)
+
+    except asyncio.TimeoutError:
+        logger.warning(f"Request timed out: {request.method} {request.url.path}")
+        return JSONResponse(
+            status_code=408,
+            content={
+                "error": "Request Timeout",
+                "detail": f"Request took longer than {timeout} seconds to process"
+            }
+        )
+    except Exception as e:
+        # Re-raise other exceptions to be handled by exception handlers
+        raise e
 
 
 # Lifecycle Management (Fixes issue #9)

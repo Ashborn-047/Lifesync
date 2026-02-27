@@ -10,8 +10,6 @@ Improvements in this version:
 
 import os
 from typing import Dict, Any, Optional, List
-from uuid import UUID
-from datetime import datetime
 import logging
 
 try:
@@ -30,6 +28,9 @@ except ImportError:
         def decorator(func):
             return func
         return decorator
+
+from .api.config import config
+from .db.timeout import TimeoutContext
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +91,9 @@ class SupabaseClient:
             data["user_id"] = user_id
 
         client = self.service_client or self.client
-        result = client.table("personality_assessments").insert(data).execute()
+
+        with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+            result = client.table("personality_assessments").insert(data).execute()
 
         return result.data[0] if result.data else {}
     
@@ -120,9 +123,11 @@ class SupabaseClient:
         ]
 
         client = self.service_client or self.client
-        result = client.table("personality_responses").insert(
-            responses
-        ).execute()
+
+        with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+            result = client.table("personality_responses").insert(
+                responses
+            ).execute()
 
         return result.data if result.data else []
     
@@ -189,9 +194,11 @@ class SupabaseClient:
         }
         
         client = self.service_client or self.client
-        result = client.table("personality_assessments").update(
-            update_data
-        ).eq("id", assessment_id).execute()
+
+        with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+            result = client.table("personality_assessments").update(
+                update_data
+            ).eq("id", assessment_id).execute()
         
         return result.data[0] if result.data else {}
 
@@ -217,7 +224,9 @@ class SupabaseClient:
         
         # internal schema usually requires explicit selection or service client
         client = self.service_client or self.client
-        result = client.table("parity_telemetry").insert(telemetry_data).execute()
+
+        with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+            result = client.table("parity_telemetry").insert(telemetry_data).execute()
         
         return result.data[0] if result.data else {}
     
@@ -309,9 +318,10 @@ class SupabaseClient:
         
         client = self.service_client or self.client
         try:
-            result = client.table("llm_explanations").insert(
-                explanation_data
-            ).execute()
+            with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+                result = client.table("llm_explanations").insert(
+                    explanation_data
+                ).execute()
         except Exception as e:
             # Fallback: if 'explanation_data' column is missing, try without it
             # We check str(e) broadly as different versions of libraries or error responses might vary
@@ -322,9 +332,10 @@ class SupabaseClient:
                     "assessment_id": assessment_id,
                     "explanation": explanation_text
                 }
-                result = client.table("llm_explanations").insert(
-                    safe_data
-                ).execute()
+                with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+                    result = client.table("llm_explanations").insert(
+                        safe_data
+                    ).execute()
             else:
                 raise e
         
@@ -334,9 +345,11 @@ class SupabaseClient:
     def get_assessment(self, assessment_id: str) -> Optional[Dict[str, Any]]:
         """Get assessment by ID - optimized to fetch only needed columns"""
         client = self.service_client or self.client
-        result = client.table("personality_assessments").select(
-            "id,created_at,trait_scores,facet_scores,mbti_code,persona_id,confidence,metadata,scoring_version,quiz_type"
-        ).eq("id", assessment_id).execute()
+
+        with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+            result = client.table("personality_assessments").select(
+                "id,created_at,trait_scores,facet_scores,mbti_code,persona_id,confidence,metadata,scoring_version,quiz_type"
+            ).eq("id", assessment_id).execute()
 
         return result.data[0] if result.data else None
 
@@ -350,9 +363,11 @@ class SupabaseClient:
             Dict with id, created_at, mbti_code, persona_id, confidence
         """
         client = self.service_client or self.client
-        result = client.table("personality_assessments").select(
-            "id,created_at,mbti_code,persona_id,confidence"
-        ).eq("id", assessment_id).execute()
+
+        with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+            result = client.table("personality_assessments").select(
+                "id,created_at,mbti_code,persona_id,confidence"
+            ).eq("id", assessment_id).execute()
 
         return result.data[0] if result.data else None
 
@@ -366,9 +381,11 @@ class SupabaseClient:
             Complete assessment record
         """
         client = self.service_client or self.client
-        result = client.table("personality_assessments").select("*").eq(
-            "id", assessment_id
-        ).execute()
+
+        with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+            result = client.table("personality_assessments").select("*").eq(
+                "id", assessment_id
+            ).execute()
 
         return result.data[0] if result.data else None
 
@@ -382,9 +399,11 @@ class SupabaseClient:
             Dict with trait_scores, facet_scores, mbti_code, persona_id
         """
         client = self.service_client or self.client
-        result = client.table("personality_assessments").select(
-            "trait_scores,facet_scores,mbti_code,persona_id,confidence"
-        ).eq("id", assessment_id).execute()
+
+        with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+            result = client.table("personality_assessments").select(
+                "trait_scores,facet_scores,mbti_code,persona_id,confidence"
+            ).eq("id", assessment_id).execute()
 
         return result.data[0] if result.data else None
     
@@ -392,9 +411,11 @@ class SupabaseClient:
     def get_scores(self, assessment_id: str) -> Optional[Dict[str, Any]]:
         """Get scores for an assessment"""
         client = self.service_client or self.client
-        result = client.table("personality_scores").select("*").eq(
-            "assessment_id", assessment_id
-        ).execute()
+
+        with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+            result = client.table("personality_scores").select("*").eq(
+                "assessment_id", assessment_id
+            ).execute()
 
         return result.data[0] if result.data else None
     
@@ -402,9 +423,11 @@ class SupabaseClient:
     def get_explanation(self, assessment_id: str) -> Optional[Dict[str, Any]]:
         """Get explanation for an assessment"""
         client = self.service_client or self.client
-        result = client.table("llm_explanations").select("*").eq(
-            "assessment_id", assessment_id
-        ).execute()
+
+        with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+            result = client.table("llm_explanations").select("*").eq(
+                "assessment_id", assessment_id
+            ).execute()
 
         return result.data[0] if result.data else None
     
@@ -424,9 +447,10 @@ class SupabaseClient:
         }
         
         # Upsert based on user_id (unique constraint)
-        result = self.client.table("profiles").upsert(
-            data, on_conflict="user_id"
-        ).execute()
+        with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+            result = self.client.table("profiles").upsert(
+                data, on_conflict="user_id"
+            ).execute()
         
         return result.data[0] if result.data else {}
 
@@ -437,9 +461,11 @@ class SupabaseClient:
         # Note: Supabase-py join syntax depends on FK setup.
         # We select profiles.* and the nested assessment data.
         client = self.service_client or self.client
-        result = client.table("profiles").select(
-            "*, current_assessment:personality_assessments(*)"
-        ).eq("user_id", user_id).execute()
+
+        with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+            result = client.table("profiles").select(
+                "*, current_assessment:personality_assessments(*)"
+            ).eq("user_id", user_id).execute()
 
         return result.data[0] if result.data else None
 
@@ -450,11 +476,13 @@ class SupabaseClient:
         Optimized query - only fetches essential fields (issue #11).
         """
         client = self.service_client or self.client
-        result = client.table("personality_assessments").select(
-            "id,created_at,quiz_type,mbti_code,persona_id,confidence"
-        ).eq("user_id", user_id).order(
-            "created_at", desc=True
-        ).limit(limit).execute()
+
+        with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+            result = client.table("personality_assessments").select(
+                "id,created_at,quiz_type,mbti_code,persona_id,confidence"
+            ).eq("user_id", user_id).order(
+                "created_at", desc=True
+            ).limit(limit).execute()
 
         return result.data if result.data else []
 
@@ -471,10 +499,11 @@ class SupabaseClient:
 
         # 1. Supabase Auth Signup
         try:
-            auth_resp = self.client.auth.sign_up({
-                "email": norm_email,
-                "password": password
-            })
+            with TimeoutContext(config.DATABASE_AUTH_TIMEOUT):
+                auth_resp = self.client.auth.sign_up({
+                    "email": norm_email,
+                    "password": password
+                })
 
             if not auth_resp.user:
                 raise ValueError("Invalid credentials") # Generic failure
@@ -493,16 +522,18 @@ class SupabaseClient:
             try:
                 # Use service client to ensure resolution/insertion works 
                 # even if RLS is partially catching up or strict.
-                if self.service_client:
-                    self.service_client.table("profiles").insert(profile_data).execute()
-                else:
-                    self.client.table("profiles").insert(profile_data).execute()
-            except Exception as e:
+                with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+                    if self.service_client:
+                        self.service_client.table("profiles").insert(profile_data).execute()
+                    else:
+                        self.client.table("profiles").insert(profile_data).execute()
+            except Exception:
                 # Treat signup as failed if profile creation fails
                 if self.service_client:
                     try:
-                        self.service_client.auth.admin.delete_user(user_id)
-                    except:
+                        with TimeoutContext(config.DATABASE_AUTH_TIMEOUT):
+                            self.service_client.auth.admin.delete_user(user_id)
+                    except Exception:
                         pass
                 raise ValueError("Invalid credentials")
             
@@ -526,10 +557,11 @@ class SupabaseClient:
 
         # Final authentication call (Always call even if resolution fails to prevent timing attacks)
         try:
-            auth_resp = self.client.auth.sign_in_with_password({
-                "email": resolved_email or "invalid@example.com",
-                "password": password
-            })
+            with TimeoutContext(config.DATABASE_AUTH_TIMEOUT):
+                auth_resp = self.client.auth.sign_in_with_password({
+                    "email": resolved_email or "invalid@example.com",
+                    "password": password
+                })
             if not auth_resp.session:
                 raise ValueError("Invalid credentials")
             return {"user": auth_resp.user, "session": auth_resp.session}
@@ -545,11 +577,12 @@ class SupabaseClient:
             return None
 
         try:
-            result = self.service_client.table("profiles") \
-                .select("email") \
-                .eq("profile_id", profile_id.strip().lower()) \
-                .limit(1) \
-                .execute()
+            with TimeoutContext(config.DATABASE_QUERY_TIMEOUT):
+                result = self.service_client.table("profiles") \
+                    .select("email") \
+                    .eq("profile_id", profile_id.strip().lower()) \
+                    .limit(1) \
+                    .execute()
 
             return result.data[0]["email"] if result.data else None
         except Exception:
@@ -557,18 +590,21 @@ class SupabaseClient:
 
     def sign_out(self):
         """End current session."""
-        return self.client.auth.sign_out()
+        with TimeoutContext(config.DATABASE_AUTH_TIMEOUT):
+            return self.client.auth.sign_out()
 
     def reset_password(self, email: str, redirect_to: Optional[str] = None):
         """Request password reset."""
         params = {"email": email}
         if redirect_to:
             params["options"] = {"redirect_to": redirect_to}
-        return self.client.auth.reset_password_for_email(email, params.get("options"))
+        with TimeoutContext(config.DATABASE_AUTH_TIMEOUT):
+            return self.client.auth.reset_password_for_email(email, params.get("options"))
 
     def update_password(self, new_password: str):
         """Update password for authenticated user."""
-        return self.client.auth.update_user({"password": new_password})
+        with TimeoutContext(config.DATABASE_AUTH_TIMEOUT):
+            return self.client.auth.update_user({"password": new_password})
 
 
 

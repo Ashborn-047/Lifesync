@@ -4,7 +4,6 @@ Loads environment variables and provides configuration settings
 """
 
 import os
-from typing import Optional
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -68,6 +67,9 @@ class Config:
     DATABASE_AUTH_TIMEOUT: float = float(os.getenv("DATABASE_AUTH_TIMEOUT", "10.0"))
     # Connection timeout (5 seconds)
     DATABASE_CONNECTION_TIMEOUT: float = float(os.getenv("DATABASE_CONNECTION_TIMEOUT", "5.0"))
+
+    # Global Request Timeout (60 seconds)
+    REQUEST_TIMEOUT: float = float(os.getenv("REQUEST_TIMEOUT", "60.0"))
 
     # CORS Configuration
     ALLOWED_ORIGINS: str = os.getenv("ALLOWED_ORIGINS", "")
