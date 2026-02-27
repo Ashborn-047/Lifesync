@@ -61,6 +61,14 @@ class Config:
     DEFAULT_LLM_MODEL: str = os.getenv("DEFAULT_LLM_MODEL", "gpt-4")
     DEFAULT_GEMINI_MODEL: str = os.getenv("DEFAULT_GEMINI_MODEL", "gemini-2.0-flash-exp")
 
+    # Database Configuration (Fixes issue #7 & #12)
+    # Query timeout for standard operations (30 seconds)
+    DATABASE_QUERY_TIMEOUT: float = float(os.getenv("DATABASE_QUERY_TIMEOUT", "30.0"))
+    # Auth operations timeout (10 seconds)
+    DATABASE_AUTH_TIMEOUT: float = float(os.getenv("DATABASE_AUTH_TIMEOUT", "10.0"))
+    # Connection timeout (5 seconds)
+    DATABASE_CONNECTION_TIMEOUT: float = float(os.getenv("DATABASE_CONNECTION_TIMEOUT", "5.0"))
+
     # CORS Configuration
     ALLOWED_ORIGINS: str = os.getenv("ALLOWED_ORIGINS", "")
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development").lower()
@@ -100,7 +108,6 @@ class Config:
             return []
 
         return origins
-
     @classmethod
     def validate(cls) -> tuple:
         """

@@ -1,15 +1,18 @@
 """
 LifeSync Personality Engine - Assessments API Route
 Handles assessment submission, scoring, and persistence
+
+Updated to use optimized query methods (Fixes issue #11)
 """
 
 import logging
 from typing import Dict, Any, Optional
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Request
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends, Request
 from pydantic import BaseModel, Field
 import logging
 
-from src.supabase_client import create_supabase_client
+from src.supabase_client import SupabaseClient
+from src.api.dependencies import get_supabase_client
 from src.ai.explanation_generator import generate_explanation_with_tone
 from src.db.quota import quota_tracker
 
@@ -53,13 +56,14 @@ class AssessmentResponse(BaseModel):
     needs_retake_reason: Optional[str] = None
     traits_with_data: list = []
 @router.get("/v1/assessments/{assessment_id}", response_model=AssessmentResponse)
-async def get_assessment(assessment_id: str):
+async def get_assessment(assessment_id: str, db: SupabaseClient = Depends(get_supabase_client)):
     """
     Get assessment data by assessment_id.
+
+    Uses optimized query to fetch only needed fields (issue #11).
     """
     try:
-        db = create_supabase_client()
-        # Fetch with full details
+        # Use optimized get_assessment method (fetches specific fields only)
         assessment = db.get_assessment(assessment_id)
         if not assessment:
             raise HTTPException(status_code=404, detail=f"Assessment {assessment_id} not found")
@@ -126,7 +130,12 @@ async def get_assessment(assessment_id: str):
         raise HTTPException(status_code=500, detail="Failed to retrieve assessment data")
 
 @router.post("/v1/assessments/{assessment_id}/generate_explanation")
-async def generate_explanation(req: Request, assessment_id: str, payload: Optional[Dict[str, Any]] = None):
+async def generate_explanation(
+    req: Request, 
+    assessment_id: str, 
+    payload: Optional[Dict[str, Any]] = None,
+    db: SupabaseClient = Depends(get_supabase_client)
+):
     """
     Generate LLM explanation for an assessment.
     Rate limit: 10 generations per day and 2 per hour per IP address.
@@ -143,15 +152,11 @@ async def generate_explanation(req: Request, assessment_id: str, payload: Option
         raise HTTPException(status_code=429, detail=error_msg)
 
     try:
-        db = create_supabase_client()
-        # Fetch assessment data with full detail for generator (use service role)
-        client = db.service_client or db.client
-        assessment_resp = client.table("personality_assessments").select("*").eq("id", assessment_id).execute()
-        
-        if not assessment_resp.data:
+        # Use get_assessment_full to fetch all fields needed for explanation generation
+        assessment = db.get_assessment_full(assessment_id)
+
+        if not assessment:
             raise HTTPException(status_code=404, detail=f"Assessment {assessment_id} not found")
-        
-        assessment = assessment_resp.data[0]
         trait_scores = assessment.get("trait_scores", {}) or {}
         facets = assessment.get("facet_scores", {}) or {}
         confidence_val = assessment.get("confidence") or 0.0
@@ -205,12 +210,14 @@ async def generate_explanation(req: Request, assessment_id: str, payload: Option
         raise HTTPException(status_code=500, detail=f"Failed to generate AI insights: {str(e)}")
 
 @router.get("/v1/assessments/{user_id}/history")
-async def get_assessment_history(user_id: str):
+async def get_assessment_history(user_id: str, db: SupabaseClient = Depends(get_supabase_client)):
     """
     Get assessment history for a user.
+
+    Uses optimized get_history method (fetches only essential fields).
     """
     try:
-        db = create_supabase_client()
+        # get_history already optimized to fetch only needed fields
         history = db.get_history(user_id)
         return history
     except Exception as e:

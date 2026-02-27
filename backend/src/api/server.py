@@ -33,6 +33,7 @@ from ..supabase_client import create_supabase_client, SupabaseClient
 from ..llm.router import generate_explanation as router_generate_explanation
 from .routes import questions as questions_router, assessments as assessments_router, profiles as profiles_router, auth as auth_router
 from typing import List
+from ..db.connection_manager import ConnectionManager
 
 logger = logging.getLogger(__name__)
 from ..utils import (
@@ -89,6 +90,66 @@ app.add_middleware(
 # GZip compression middleware (performance optimization)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
+
+# Lifecycle Management (Fixes issue #9)
+@app.on_event("startup")
+async def startup_event():
+    """
+    Initialize resources on application startup.
+
+    - Initializes database connection pool
+    - Verifies database connectivity
+    - Logs startup information
+    """
+    logger.info("LifeSync Personality Engine starting up...")
+
+    try:
+        # Initialize connection pool
+        manager = ConnectionManager()
+        url = config.get_supabase_url()
+        key = config.get_supabase_key()
+        service_key = os.getenv("SUPABASE_SERVICE_ROLE")
+
+        if not url or not key or "your-project" in url or "your-anon-key" in key:
+            logger.warning(
+                "Supabase credentials not configured properly. "
+                "Database operations will fail until credentials are set."
+            )
+        else:
+            manager.initialize(url=url, key=key, service_key=service_key)
+            logger.info("Database connection pool initialized successfully")
+
+    except Exception as e:
+        logger.error(f"Failed to initialize connection pool: {e}")
+        # Don't fail startup - allow health checks to work
+        # Individual requests will fail with appropriate errors
+
+    logger.info(f"Server started on {config.API_HOST}:{config.API_PORT}")
+    logger.info("Startup complete")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """
+    Cleanup resources on application shutdown.
+
+    - Closes database connection pool
+    - Logs shutdown information
+    """
+    logger.info("LifeSync Personality Engine shutting down...")
+
+    try:
+        # Close connection pool
+        manager = ConnectionManager()
+        manager.close()
+        logger.info("Database connection pool closed successfully")
+
+    except Exception as e:
+        logger.error(f"Error during shutdown: {e}")
+
+    logger.info("Shutdown complete")
+
+
 # Include routers
 app.include_router(questions_router.router, tags=["questions"])
 app.include_router(assessments_router.router, tags=["assessments"])
@@ -121,8 +182,31 @@ except Exception as e:
 # Health check endpoint
 @app.get("/health")
 def health_check():
-    """Health check endpoint"""
-    return {"status": "healthy", "service": "LifeSync Personality Engine"}
+    """
+    Health check endpoint.
+
+    Returns server status and connection pool health.
+    """
+    try:
+        manager = ConnectionManager()
+        pool_initialized = manager.is_initialized()
+
+        return {
+            "status": "healthy",
+            "service": "LifeSync Personality Engine",
+            "version": "1.0.0",
+            "database": {
+                "connection_pool": "initialized" if pool_initialized else "not_initialized"
+            }
+        }
+    except Exception as e:
+        logger.error(f"Health check error: {e}")
+        return {
+            "status": "degraded",
+            "service": "LifeSync Personality Engine",
+            "version": "1.0.0",
+            "error": str(e)
+        }
 
 
 @app.get("/")
