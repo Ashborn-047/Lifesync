@@ -170,16 +170,20 @@ class TestLLMGenerationRateLimit:
     @patch('src.api.routes.assessments.generate_explanation_with_tone')
     def test_llm_generation_daily_limit(self, mock_generate, mock_get_db, client):
         """Test that LLM generation enforces 10/day rate limit."""
+        from src.db.quota import quota_tracker
+        quota_tracker.reset_user_quota("testclient")
+
         # Mock Supabase response
         mock_db = MagicMock()
         mock_db.get_assessment_full.return_value = {
             "id": "test-assessment-123",
-            "trait_scores": {"O": 75, "C": 65, "E": 55, "A": 70, "N": 60},
+            "trait_scores": {"O": 75.0, "C": 65.0, "E": 55.0, "A": 70.0, "N": 60.0},
             "facet_scores": {},
             "confidence": 0.85,
             "mbti_code": "ENFJ",
             "personality_code": "ENFJ-A"
         }
+        # Ensure that get_assessment_full doesn't return a MagicMock itself, but our dict
         mock_get_db.return_value = mock_db
 
         # Mock explanation generator
@@ -205,18 +209,18 @@ class TestLLMGenerationRateLimit:
                  # Hourly limit hits at 3rd request
                  pass
 
-        # This test logic is tricky with multiple limits.
-        # Let's simplify: Test daily limit by mocking time or just verifying we hit *some* limit.
-
     @patch('src.api.dependencies.get_db_client')
     @patch('src.api.routes.assessments.generate_explanation_with_tone')
     def test_llm_generation_hourly_limit(self, mock_generate, mock_get_db, client):
         """Test that LLM generation enforces 2/hour rate limit."""
+        from src.db.quota import quota_tracker
+        quota_tracker.reset_user_quota("testclient")
+
         # Mock Supabase response
         mock_db = MagicMock()
         mock_db.get_assessment_full.return_value = {
             "id": "test-assessment-456",
-            "trait_scores": {"O": 75, "C": 65, "E": 55, "A": 70, "N": 60},
+            "trait_scores": {"O": 75.0, "C": 65.0, "E": 55.0, "A": 70.0, "N": 60.0},
             "facet_scores": {},
             "confidence": 0.85,
             "mbti_code": "ENFJ",
@@ -256,7 +260,7 @@ class TestLLMGenerationRateLimit:
         mock_db = MagicMock()
         mock_db.get_assessment_full.return_value = {
             "id": "test-assessment-789",
-            "trait_scores": {"O": 75, "C": 65, "E": 55, "A": 70, "N": 60},
+            "trait_scores": {"O": 75.0, "C": 65.0, "E": 55.0, "A": 70.0, "N": 60.0},
             "facet_scores": {},
             "confidence": 0.85,
             "mbti_code": "ENFJ",
