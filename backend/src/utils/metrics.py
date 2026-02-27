@@ -131,3 +131,41 @@ def log_llm_metrics(
         f"Time: {generation_time_ms:.2f}ms"
     )
 
+class MetricsCollector:
+    """
+    Singleton class to collect application metrics.
+    """
+    _instance = None
+
+    def __init__(self):
+        self.start_time = time.time()
+        self.request_count = 0
+        self.error_count = 0
+        self.total_duration_ms = 0.0
+
+    @classmethod
+    def get_instance(cls):
+        if not cls._instance:
+            cls._instance = MetricsCollector()
+        return cls._instance
+
+    def record_request(self, duration_ms: float, is_error: bool):
+        self.request_count += 1
+        self.total_duration_ms += duration_ms
+        if is_error:
+            self.error_count += 1
+
+    def get_metrics(self):
+        uptime = time.time() - self.start_time
+        avg_response_time = (self.total_duration_ms / self.request_count) if self.request_count > 0 else 0
+        error_rate = (self.error_count / self.request_count) if self.request_count > 0 else 0
+
+        return {
+            "uptime_seconds": round(uptime, 2),
+            "request_count": self.request_count,
+            "error_count": self.error_count,
+            "error_rate": round(error_rate, 4),
+            "avg_response_time_ms": round(avg_response_time, 2)
+        }
+
+metrics_collector = MetricsCollector.get_instance()

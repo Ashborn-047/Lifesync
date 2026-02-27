@@ -62,6 +62,8 @@ logging.basicConfig(
 from ..supabase_client import create_supabase_client
 from .routes import questions as questions_router, assessments as assessments_router, profiles as profiles_router, auth as auth_router
 from ..db.connection_manager import ConnectionManager
+from .middleware.logging_middleware import LoggingMiddleware
+from ..utils.metrics import metrics_collector
 
 logger = logging.getLogger(__name__)
 from .config import config
@@ -106,6 +108,9 @@ app.add_middleware(
 
 # GZip compression middleware (performance optimization)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# Logging Middleware (Fixes issue #13)
+app.add_middleware(LoggingMiddleware)
 
 # Request Timeout Middleware (Fixes issue #12)
 @app.middleware("http")
@@ -225,6 +230,16 @@ except Exception as e:
 
 
 # Health check endpoint
+@app.get("/metrics")
+def get_metrics():
+    """
+    Get application metrics.
+
+    Returns:
+        JSON object with uptime, request count, error rate, etc.
+    """
+    return metrics_collector.get_metrics()
+
 @app.get("/health")
 def health_check():
     """
