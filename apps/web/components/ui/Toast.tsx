@@ -2,7 +2,8 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { X, CheckCircle, AlertCircle, Info } from "lucide-react";
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from "react";
+import { registerGlobalToast } from "@/lib/api";
 
 interface Toast {
   id: string;
@@ -33,6 +34,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     },
     []
   );
+
+  // Register global toast handler
+  useEffect(() => {
+    registerGlobalToast(showToast);
+  }, [showToast]);
 
   const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));

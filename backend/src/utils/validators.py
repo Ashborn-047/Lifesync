@@ -2,8 +2,8 @@
 LifeSync Personality Engine - Input Validators
 """
 
-from typing import Dict, Any, List, Tuple
 import re
+from typing import Dict, Tuple
 
 
 def validate_quiz_type(quiz_type: str) -> bool:

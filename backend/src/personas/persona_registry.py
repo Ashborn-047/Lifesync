@@ -1,5 +1,4 @@
-from typing import List, Dict, Any, Optional, Tuple
-import math
+from typing import Any, Dict, Tuple
 
 PERSONAS = [
   # 1

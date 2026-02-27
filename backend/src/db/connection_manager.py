@@ -4,10 +4,10 @@ Implements singleton pattern for Supabase client to avoid per-request connection
 Fixes issue #7: No database connection pooling
 """
 
-import os
 import logging
 import threading
 from typing import Optional
+
 from ..supabase_client import SupabaseClient, create_supabase_client
 
 logger = logging.getLogger(__name__)

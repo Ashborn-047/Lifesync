@@ -3,10 +3,10 @@ Database Query Timeout Handler
 Fixes issue #12: No database query timeout configuration
 """
 
-import logging
-import functools
 import asyncio
-from typing import Callable, Any, Optional
+import functools
+import logging
+from typing import Any, Callable, Optional
 
 logger = logging.getLogger(__name__)
 

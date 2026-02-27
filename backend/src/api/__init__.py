@@ -2,7 +2,8 @@
 LifeSync Personality Engine - API Module
 """
 
-from .server import app
-from .config import config, Config
+# Removing app import to avoid circular dependency
+# from .server import app
+from .config import Config, config
 
-__all__ = ['app', 'config', 'Config']
+__all__ = ['config', 'Config']

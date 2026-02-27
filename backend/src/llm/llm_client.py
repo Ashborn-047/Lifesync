@@ -6,7 +6,8 @@ Handles communication with LLM providers for personality explanations
 import json
 import os
 import time
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from .templates import SYSTEM_PROMPT, get_personality_explanation_prompt
 
 

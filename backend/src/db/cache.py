@@ -3,11 +3,12 @@ Cache Implementation for LifeSync
 Provides LRU/TTL caching strategies to optimize database access.
 """
 
-import time
 import functools
 import logging
-from typing import Any, Optional, Dict, Tuple, Callable
-from cachetools import TTLCache, LRUCache
+import time
+from typing import Any, Callable, Dict, Optional, Tuple
+
+from cachetools import LRUCache, TTLCache
 
 logger = logging.getLogger(__name__)
 
@@ -104,10 +105,9 @@ def invalidate_assessment_cache(assessment_id: str):
 def invalidate_history_cache(user_id: str):
     """Invalidate history cache for a user."""
     keys_to_remove = [k for k in history_cache.keys() if user_id in str(k)]
-    for k in history_cache.keys():
-        if user_id in str(k):
-            try:
-                del history_cache[k]
-            except KeyError:
-                pass
-    logger.debug(f"Invalidated history cache entries for user {user_id}")
+    for k in keys_to_remove:
+        try:
+            del history_cache[k]
+        except KeyError:
+            pass
+    logger.debug(f"Invalidated {len(keys_to_remove)} history cache entries for user {user_id}")

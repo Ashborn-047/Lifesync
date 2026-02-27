@@ -3,24 +3,25 @@ Database Retry Logic with Exponential Backoff
 Fixes issue #10: No retry logic for transient database errors
 """
 
-import logging
 import functools
-from typing import Callable, Any
+import logging
+from typing import Any, Callable
+
+from httpx import (
+    ConnectError,
+    ConnectTimeout,
+    NetworkError,
+    ReadTimeout,
+    RemoteProtocolError,
+)
 from tenacity import (
+    after_log,
+    before_sleep_log,
     retry,
+    retry_if_exception,
+    retry_if_exception_type,
     stop_after_attempt,
     wait_exponential,
-    retry_if_exception_type,
-    retry_if_exception,
-    before_sleep_log,
-    after_log
-)
-from httpx import (
-    ConnectTimeout,
-    ReadTimeout,
-    NetworkError,
-    RemoteProtocolError,
-    ConnectError
 )
 
 logger = logging.getLogger(__name__)

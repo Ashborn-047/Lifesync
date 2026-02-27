@@ -3,7 +3,8 @@ LifeSync Personality Engine - Explanation Engine
 Provider-agnostic explanation generation
 """
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from .router import generate_explanation as router_generate_explanation
 
 

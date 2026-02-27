@@ -5,12 +5,10 @@ Provides shared resources for FastAPI routes
 Updated to use connection pool manager (Fixes issue #7, #8, #9)
 """
 
-import os
 import logging
-from typing import Generator
-from ..supabase_client import SupabaseClient
+
 from ..db.connection_manager import get_db_client
-from .config import config
+from ..supabase_client import SupabaseClient
 
 logger = logging.getLogger(__name__)
 

@@ -3,12 +3,13 @@ LifeSync Personality Engine - Configuration
 Loads environment variables and provides configuration settings
 """
 
-import os
-from dotenv import load_dotenv
-
 # Load environment variables from .env file
 # Handle BOM (Byte Order Mark) that Windows editors sometimes add
 import codecs
+import os
+
+from dotenv import load_dotenv
+
 env_path = ".env"
 if os.path.exists(env_path):
     # Read file and remove BOM if present

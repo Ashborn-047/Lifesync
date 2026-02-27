@@ -3,17 +3,18 @@ LifeSync Personality Engine - LLM Router
 Routes requests to the appropriate LLM provider with fallback support
 """
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from ..config.llm_provider import (
-    get_provider,
-    get_openai_key,
-    get_gemini_key,
-    is_provider_available,
+    DEFAULT_GEMINI_MODEL,
     DEFAULT_OPENAI_MODEL,
-    DEFAULT_GEMINI_MODEL
+    get_gemini_key,
+    get_openai_key,
+    get_provider,
+    is_provider_available,
 )
-from .openai_provider import OpenAIProvider
 from .gemini_provider import GeminiProvider
+from .openai_provider import OpenAIProvider
 
 
 def get_provider_instance(provider: Optional[str] = None) -> any:

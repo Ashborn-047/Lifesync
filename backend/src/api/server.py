@@ -3,21 +3,23 @@ LifeSync Personality Engine - FastAPI Server
 REST API for personality assessment scoring and explanation generation
 """
 
-import os
 import asyncio
+import os
+
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from dotenv import load_dotenv
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
 from limits import parse
+from contextlib import asynccontextmanager
+from pydantic import BaseModel
+from slowapi import Limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+
 from src.api.middleware.logging_middleware import LoggingMiddleware
 from src.db.cache import get_cache_stats
-from contextlib import asynccontextmanager
 
 # Load environment variables from .env file
 load_dotenv()
@@ -54,14 +56,20 @@ Limiter.check_for_limits = check_for_limits
 
 # Configure logging for local development
 import logging
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-from ..supabase_client import create_supabase_client
-from .routes import questions as questions_router, assessments as assessments_router, profiles as profiles_router, auth as auth_router
 from ..db.connection_manager import ConnectionManager
+from ..supabase_client import create_supabase_client
+from ..utils.metrics import metrics_collector
+from .middleware.logging_middleware import LoggingMiddleware
+from .routes import assessments as assessments_router
+from .routes import auth as auth_router
+from .routes import profiles as profiles_router
+from .routes import questions as questions_router
 
 logger = logging.getLogger(__name__)
 from .config import config
@@ -246,17 +254,13 @@ except Exception as e:
 @app.get("/metrics")
 def get_metrics():
     """
-    Get performance metrics and cache stats.
+    Get application performance metrics and cache stats.
     """
-    return {
-        "status": "healthy",
-        "cache": get_cache_stats(),
-        "database": {
-            "initialized": ConnectionManager().is_initialized()
-        }
-    }
+    metrics = metrics_collector.get_metrics()
+    metrics["cache"] = get_cache_stats()
+    metrics["database_initialized"] = ConnectionManager().is_initialized()
+    return metrics
 
-# Health check endpoint
 @app.get("/health")
 def health_check():
     """

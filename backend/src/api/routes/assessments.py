@@ -6,16 +6,16 @@ Updated to use optimized query methods (Fixes issue #11)
 """
 
 import logging
-from typing import Dict, Any, Optional
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends, Request
-from pydantic import BaseModel, Field
-import logging
+from typing import Any, Dict, Optional
 
-from src.supabase_client import SupabaseClient
-from src.api.dependencies import get_supabase_client
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel, Field, field_validator
+
 from src.ai.explanation_generator import generate_explanation_with_tone
+from src.api.dependencies import get_supabase_client
 from src.db.quota import quota_tracker
-from src.utils.validators import validate_assessment_id, sanitize_answers, validate_answers
+from src.supabase_client import SupabaseClient
+from src.utils.validators import validate_assessment_id, sanitize_answers, validate_answers, sanitize_text
 from src.llm.circuit_breaker import CircuitBreaker, with_circuit_breaker, CircuitBreakerOpenException
 
 # Initialize Circuit Breaker for LLM calls
@@ -42,6 +42,17 @@ class AssessmentMetadata(BaseModel):
     timestamp: float
     is_fallback: bool = False
     platform: Optional[str] = None
+
+class ExplanationRequest(BaseModel):
+    """Request model for explanation generation"""
+    provider: Optional[str] = None
+
+    @field_validator('provider')
+    @classmethod
+    def sanitize_provider(cls, v: Optional[str]) -> Optional[str]:
+        if v:
+            return sanitize_text(v)
+        return v
 
 class AssessmentResponse(BaseModel):
     """Response model for scored assessment - Canonical Contract"""
@@ -143,17 +154,17 @@ async def get_assessment(assessment_id: str, db: SupabaseClient = Depends(get_su
 async def generate_explanation(
     req: Request, 
     assessment_id: str, 
-    payload: Optional[Dict[str, Any]] = None,
+    payload: Optional[ExplanationRequest] = None,
     db: SupabaseClient = Depends(get_supabase_client)
 ):
     """
     Generate LLM explanation for an assessment.
     Rate limit: 10 generations per day and 2 per hour per IP address.
     """
-    # Validate assessment_id format
+    # Validate assessment_id
     is_valid, error = validate_assessment_id(assessment_id)
     if not is_valid:
-        raise HTTPException(status_code=400, detail=error)
+        raise HTTPException(status_code=422, detail=error)
 
     # Apply rate limits (both day and hour limits)
     limiter = get_limiter(req)
@@ -197,7 +208,7 @@ async def generate_explanation(
             "personality_code": assessment.get("personality_code") or f"{mbti_code}-X"
         }
         
-        provider = payload.get("provider") if payload else None
+        provider = payload.provider if payload else None
         
         logger.info(f"Generating AI explanation for assessment {assessment_id} (Provider: {provider or 'default'})")
         
@@ -234,15 +245,33 @@ async def generate_explanation(
         raise HTTPException(status_code=500, detail=f"Failed to generate AI insights: {str(e)}")
 
 @router.get("/v1/assessments/{user_id}/history")
-async def get_assessment_history(user_id: str, db: SupabaseClient = Depends(get_supabase_client)):
+async def get_assessment_history(
+    user_id: str,
+    page: int = 1,
+    page_size: int = 10,
+    db: SupabaseClient = Depends(get_supabase_client)
+):
     """
-    Get assessment history for a user.
+    Get assessment history for a user with pagination.
 
-    Uses optimized get_history method (fetches only essential fields).
+    Args:
+        user_id: User ID
+        page: Page number (default: 1)
+        page_size: Items per page (default: 10)
+
+    Returns:
+        JSON object with data and pagination metadata
     """
     try:
-        # get_history already optimized to fetch only needed fields
-        history = db.get_history(user_id)
+        # Validate pagination params
+        if page < 1:
+            page = 1
+        if page_size < 1:
+            page_size = 10
+        if page_size > 100:
+            page_size = 100
+
+        history = db.get_history(user_id, page=page, page_size=page_size)
         return history
     except Exception as e:
         logger.error(f"Error fetching history: {e}")
