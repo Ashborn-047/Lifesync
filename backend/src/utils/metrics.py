@@ -2,12 +2,10 @@
 LifeSync Personality Engine - Metrics and Logging Utilities
 """
 
-import time
 import logging
-from typing import Callable, Any
+import time
 from functools import wraps
-from datetime import datetime
-
+from typing import Callable
 
 # Configure logging
 logging.basicConfig(

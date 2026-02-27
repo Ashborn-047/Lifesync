@@ -3,12 +3,10 @@ LifeSync Personality Scorer Wrapper
 Provides a simple interface to score personality assessments
 """
 
-import json
-import os
 from pathlib import Path
-from typing import Dict, Any
-from .personality_scorer import PersonalityScorer
+from typing import Any, Dict
 
+from .personality_scorer import PersonalityScorer
 
 # Get the path to the question bank
 _QUESTIONS_PATH = Path(__file__).parent.parent.parent / "data" / "question_bank" / "lifesync_180_questions.json"

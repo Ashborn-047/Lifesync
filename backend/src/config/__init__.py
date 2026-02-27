@@ -3,11 +3,11 @@ LifeSync Personality Engine - Configuration Module
 """
 
 from .llm_provider import (
-    LLMProvider,
     DEFAULT_PROVIDER,
-    get_provider,
+    LLMProvider,
     get_gemini_key,
-    is_provider_available
+    get_provider,
+    is_provider_available,
 )
 
 __all__ = [

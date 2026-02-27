@@ -6,16 +6,16 @@ Updated to use optimized query methods (Fixes issue #11)
 """
 
 import logging
-from typing import Dict, Any, Optional
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends, Request
-from pydantic import BaseModel, Field, field_validator
-import logging
+from typing import Any, Dict, Optional
 
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel, Field, field_validator
+
+from src.ai.explanation_generator import generate_explanation_with_tone
+from src.api.dependencies import get_supabase_client
+from src.db.quota import quota_tracker
 from src.supabase_client import SupabaseClient
 from src.utils.validators import sanitize_text, validate_assessment_id
-from src.api.dependencies import get_supabase_client
-from src.ai.explanation_generator import generate_explanation_with_tone
-from src.db.quota import quota_tracker
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

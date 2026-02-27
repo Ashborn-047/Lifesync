@@ -3,10 +3,11 @@ LifeSync Personality Scoring Engine
 Handles 180-question OCEAN assessment with 30 facets
 """
 
-import json
 import hashlib
-from typing import Dict, List, Tuple, Optional, Union
+import json
 from collections import defaultdict
+from typing import Dict, List, Optional, Tuple
+
 from src.config.constants import SCORING_VERSION
 
 
@@ -211,7 +212,7 @@ class PersonalityScorer:
             },
             'facets': {self.facets[k]: (round(v, 3) if v is not None else None) for k, v in facet_scores.items()},
             'facet_confidence': {self.facets[k]: round(v, 3) for k, v in facet_confidence.items()},
-            'mbti_proxy': mbti_code,
+            # 'mbti_proxy': mbti_code, # Already defined above
             'neuroticism_level': n_level,
             'personality_code': personality_code,
             'top_facets': top_facets,

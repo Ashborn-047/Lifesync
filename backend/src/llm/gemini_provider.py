@@ -3,11 +3,12 @@ LifeSync Personality Engine - Gemini Provider
 Production-ready with retry, backoff, and safe JSON handling
 """
 
-import time
 import logging
-from typing import Optional, List
-from .provider_base import LLMProviderBase
+import time
+from typing import List, Optional
+
 from ..utils.safe_json import safe_load_json
+from .provider_base import LLMProviderBase
 from .providers.provider_failure import ProviderFailure
 
 logger = logging.getLogger(__name__)

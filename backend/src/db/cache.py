@@ -3,11 +3,11 @@ Cache Implementation for LifeSync
 Provides LRU/TTL caching strategies to optimize database access.
 """
 
-import time
 import functools
 import logging
-from typing import Any, Optional, Dict, Tuple, Callable
-from cachetools import TTLCache, LRUCache
+from typing import Any, Callable, Dict
+
+from cachetools import TTLCache
 
 logger = logging.getLogger(__name__)
 

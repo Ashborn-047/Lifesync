@@ -4,15 +4,14 @@ Production-ready router with automatic fallback between providers
 """
 
 import logging
-from typing import Dict, Any, Optional
-from ..config.llm_provider import (
-    get_gemini_key,
-    get_provider,
-    is_provider_available
+from typing import Any, Dict, Optional
+
+from ..config.llm_provider import get_gemini_key
+from .circuit_breaker import (
+    CircuitBreaker,
+    with_circuit_breaker,
 )
 from .gemini_provider import GeminiProvider
-from .providers.provider_failure import ProviderFailure
-from .circuit_breaker import CircuitBreaker, with_circuit_breaker, CircuitBreakerOpenException
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +72,7 @@ def _generate_explanation_impl(
         }
     
     try:
-        logger.info(f"[LLM] Using Gemini (gemini-2.0-flash)")
+        logger.info("[LLM] Using Gemini (gemini-2.0-flash)")
         provider_instance = GeminiProvider(model_name="gemini-2.0-flash", api_key=gemini_key)
         
         result = provider_instance.generate_explanation(
@@ -161,6 +160,5 @@ def _unused_generate_explanation_legacy_signature(
     tone_profile: Optional[Dict[str, Any]] = None,
     persona: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
-    gemini_key = get_gemini_key()
-
+    # gemini_key = get_gemini_key()
     pass

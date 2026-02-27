@@ -5,7 +5,7 @@ Handles malformed JSON from LLM responses with extraction and repair
 
 import json
 import re
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 
 def extract_json(text: str) -> Optional[str]:

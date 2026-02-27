@@ -3,12 +3,13 @@ Logging Middleware for Observability
 Logs request/response details in structured JSON format.
 """
 
-import time
 import json
 import logging
+import time
+
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import Response
+
 from ...utils.metrics import metrics_collector
 
 logger = logging.getLogger(__name__)

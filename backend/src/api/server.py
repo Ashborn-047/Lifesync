@@ -3,18 +3,19 @@ LifeSync Personality Engine - FastAPI Server
 REST API for personality assessment scoring and explanation generation
 """
 
-import os
 import asyncio
+import os
+
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from dotenv import load_dotenv
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
 from limits import parse
+from pydantic import BaseModel
+from slowapi import Limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 # Load environment variables from .env file
 load_dotenv()
@@ -54,16 +55,20 @@ Limiter.check_for_limits = check_for_limits
 
 # Configure logging for local development
 import logging
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-from ..supabase_client import create_supabase_client
-from .routes import questions as questions_router, assessments as assessments_router, profiles as profiles_router, auth as auth_router
 from ..db.connection_manager import ConnectionManager
-from .middleware.logging_middleware import LoggingMiddleware
+from ..supabase_client import create_supabase_client
 from ..utils.metrics import metrics_collector
+from .middleware.logging_middleware import LoggingMiddleware
+from .routes import assessments as assessments_router
+from .routes import auth as auth_router
+from .routes import profiles as profiles_router
+from .routes import questions as questions_router
 
 logger = logging.getLogger(__name__)
 from .config import config

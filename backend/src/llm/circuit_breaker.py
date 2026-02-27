@@ -3,13 +3,12 @@ Circuit Breaker Implementation for LLM Calls
 Prevents cascading failures when LLM providers are down or slow.
 """
 
-import time
-import asyncio
-import logging
-from enum import Enum
 import inspect
-from typing import Callable, Any, Optional
+import logging
+import time
+from enum import Enum
 from functools import wraps
+from typing import Callable, Optional
 
 logger = logging.getLogger(__name__)
 

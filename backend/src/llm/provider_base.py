@@ -3,11 +3,11 @@ LifeSync Personality Engine - LLM Provider Base Class
 Abstract base class for LLM providers
 """
 
-from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
-import time
 import json
 import re
+import time
+from abc import ABC, abstractmethod
+from typing import Any, Dict, Optional
 
 
 def safe_json_parse(content: str) -> Dict[str, Any]:

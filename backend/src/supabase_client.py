@@ -8,14 +8,12 @@ Improvements in this version:
 - Query timeout support (issue #12)
 """
 
-import os
-from typing import Dict, Any, Optional, List
-from uuid import UUID
-from datetime import datetime
 import logging
+import os
+from typing import Any, Dict, List, Optional
 
 try:
-    from supabase import create_client, Client
+    from supabase import Client, create_client
 except ImportError:
     raise ImportError(
         "supabase package required. Install with: pip install supabase"
@@ -32,8 +30,14 @@ except ImportError:
         return decorator
 
 from .api.config import config
+from .db.cache import (
+    assessment_cache,
+    cached,
+    history_cache,
+    invalidate_assessment_cache,
+    invalidate_history_cache,
+)
 from .db.timeout import TimeoutContext
-from .db.cache import cached, assessment_cache, history_cache, invalidate_assessment_cache, invalidate_history_cache
 
 logger = logging.getLogger(__name__)
 
@@ -560,7 +564,7 @@ class SupabaseClient:
                         self.service_client.table("profiles").insert(profile_data).execute()
                     else:
                         self.client.table("profiles").insert(profile_data).execute()
-            except Exception as e:
+            except Exception:
                 # Treat signup as failed if profile creation fails
                 if self.service_client:
                     try:

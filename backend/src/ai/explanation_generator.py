@@ -4,13 +4,12 @@ Integrates tone generation with LLM explanation workflow
 """
 
 import logging
-from typing import Dict, Any, Optional
-from ..llm.router import generate_explanation as router_generate_explanation
-from ..config.llm_provider import get_provider
-from .tone_generator import generate_tone_safe
-from ..llm.templates import _convert_traits_to_codes
+from typing import Any, Dict, Optional
 
+from ..llm.router import generate_explanation as router_generate_explanation
+from ..llm.templates import _convert_traits_to_codes
 from ..personas.persona_registry import map_profile_to_persona
+from .tone_generator import generate_tone_safe
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +49,7 @@ def generate_explanation_with_tone(
         ValueError: If input data is invalid
     """
     # Step 0: Logging
-    logger.info(f"[LLM] Generating explanation using Gemini")
+    logger.info("[LLM] Generating explanation using Gemini")
     
     # Step 1: Generate tone profile from traits
     # Convert full trait names to OCEAN codes for tone generator

@@ -4,12 +4,10 @@ Handles fetching user profiles (latest state)
 """
 
 import logging
-from typing import Dict, Any, Optional
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
 
-from src.supabase_client import create_supabase_client, SupabaseClient
-from src.api.routes.assessments import AssessmentResponse
+from fastapi import APIRouter, HTTPException
+
+from src.supabase_client import create_supabase_client
 
 logger = logging.getLogger(__name__)
 

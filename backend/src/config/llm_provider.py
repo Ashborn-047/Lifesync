@@ -4,6 +4,7 @@ LifeSync Personality Engine - LLM Provider Configuration
 
 import os
 from typing import Literal
+
 from dotenv import load_dotenv
 
 # Load environment variables

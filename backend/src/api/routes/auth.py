@@ -4,12 +4,13 @@ Handles user authentication and account management.
 """
 
 import logging
-from typing import Optional, Dict, Any
-from fastapi import APIRouter, HTTPException, Depends, Request
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
-from src.supabase_client import SupabaseClient
 from src.api.dependencies import get_supabase_client
+from src.supabase_client import SupabaseClient
 from src.utils.validators import sanitize_text
 
 logger = logging.getLogger(__name__)
@@ -65,7 +66,7 @@ async def signup(req: Request, request: SignupRequest, db: SupabaseClient = Depe
             "message": "User created successfully", 
             "user_id": result["user"].id
         }
-    except ValueError as e:
+    except ValueError:
         # All failures return the same generic error message
         raise HTTPException(status_code=400, detail="Invalid credentials")
     except Exception as e:
