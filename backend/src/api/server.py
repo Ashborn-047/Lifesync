@@ -6,12 +6,15 @@ REST API for personality assessment scoring and explanation generation
 import os
 from typing import Dict, Any, Optional, List
 from datetime import datetime
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 # Load environment variables from .env file
 load_dotenv()
@@ -45,6 +48,8 @@ from ..utils import (
 )
 from .config import config
 
+# Initialize rate limiter
+limiter = Limiter(key_func=get_remote_address)
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -53,10 +58,29 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware
+# Add rate limiter to app state
+app.state.limiter = limiter
+
+# Add rate limit exception handler
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    """Custom handler for rate limit exceeded errors"""
+    return JSONResponse(
+        status_code=429,
+        content={
+            "error": "Rate limit exceeded",
+            "detail": "Too many requests. Please try again later.",
+            "retry_after": exc.detail if hasattr(exc, 'detail') else None
+        }
+    )
+
+# CORS middleware - Use configured allowed origins
+allowed_origins = config.get_allowed_origins()
+logger.info(f"CORS allowed origins: {allowed_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=allowed_origins if allowed_origins else ["*"],  # Fallback to * only if no origins configured
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
