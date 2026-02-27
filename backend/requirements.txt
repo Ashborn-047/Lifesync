@@ -13,3 +13,4 @@ pytest-asyncio
 reportlab
 email-validator
 tenacity==8.2.3
+slowapi==0.1.9

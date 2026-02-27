@@ -26,6 +26,8 @@ LifeSync is a comprehensive personality assessment platform that combines the Bi
 - **Retry Logic**: Automatic retry with exponential backoff for transient errors
 - **Query Optimization**: Selective field fetching reduces bandwidth by 50-80%
 - **Query Timeouts**: Prevents hanging operations with configurable timeouts
+- **Rate Limiting**: Comprehensive rate limiting on all authentication and LLM endpoints
+- **CORS Security**: Configurable CORS with environment-specific origin restrictions
 
 ## Architecture
 
@@ -117,6 +119,34 @@ lifesync/
    cp .env.example .env
    # Edit .env with your Supabase and LLM API keys
    ```
+
+   **Required Environment Variables:**
+   ```bash
+   # Database
+   SUPABASE_URL=your-supabase-url
+   SUPABASE_KEY=your-supabase-anon-key
+   SUPABASE_SERVICE_ROLE=your-supabase-service-role-key
+
+   # LLM Providers (at least one required)
+   GEMINI_API_KEY=your-gemini-api-key
+   OPENAI_API_KEY=your-openai-api-key
+   GROK_API_KEY=your-grok-api-key
+   LLM_PROVIDER=gemini  # or openai, grok
+
+   # Security Configuration
+   ALLOWED_ORIGINS=https://yourdomain.com,https://app.yourdomain.com
+   ENVIRONMENT=production  # or development
+
+   # API Configuration
+   API_HOST=0.0.0.0
+   PORT=5174  # or any available port
+   ```
+
+   **Security Notes:**
+   - `ALLOWED_ORIGINS`: Comma-separated list of allowed CORS origins for production
+   - `ENVIRONMENT`: Set to `development` to auto-allow localhost origins
+   - In production, ensure `ALLOWED_ORIGINS` contains only trusted domains
+   - Rate limiting is automatically enabled (see Rate Limits section below)
 
 4. Run database migrations:
    ```bash
@@ -225,6 +255,35 @@ To deploy the web app for your colleagues to view:
    - Install Expo Go app on your mobile device
    - Scan the QR code or use the LAN URL
    - Ensure your mobile and PC are on the same network
+
+## Security & Rate Limiting
+
+LifeSync includes comprehensive security features to protect against abuse:
+
+### Rate Limits
+
+All rate limits are enforced per IP address and return HTTP 429 when exceeded:
+
+| Endpoint | Rate Limit | Purpose |
+|----------|------------|---------|
+| `POST /v1/auth/signup` | 5 per hour | Prevent automated account creation |
+| `POST /v1/auth/login` | 10 per hour, 3 per minute | Prevent brute force attacks |
+| `POST /v1/auth/reset-password` | 3 per hour | Prevent email enumeration attacks |
+| `POST /v1/assessments/{id}/generate_explanation` | 10 per day, 2 per hour | Protect LLM resources and costs |
+
+### CORS Configuration
+
+- **Development**: Automatically allows `localhost:3000`, `localhost:3001`, and `127.0.0.1` origins
+- **Production**: Only allows origins specified in `ALLOWED_ORIGINS` environment variable
+- **Default**: If `ALLOWED_ORIGINS` is empty in production, CORS is disabled (no origins allowed)
+
+### Best Practices
+
+1. **Environment Variables**: Never commit `.env` files. Use `.env.example` as a template.
+2. **Service Role Key**: Keep `SUPABASE_SERVICE_ROLE` secret. Only use in backend, never expose to frontend.
+3. **API Keys**: Rotate LLM API keys regularly and monitor usage.
+4. **CORS Origins**: In production, list only your actual frontend domains.
+5. **Rate Limits**: Monitor logs for rate limit violations to detect potential abuse.
 
 ## Performance Tips
 
