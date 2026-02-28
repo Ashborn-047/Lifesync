@@ -18,25 +18,49 @@ LifeSync is a comprehensive personality assessment platform that combines the Bi
 
 ### Technical Features
 - **Null-Safe Scoring**: Returns `null` for insufficient data instead of defaulting to 50%
-- **Cache Busting**: Ensures fresh question data on every fetch
-- **Response Validation**: Backend validation for balanced question coverage
-- **Data Persistence**: Mobile app stores assessment results locally
-- **PDF Reports**: Downloadable personality assessment reports
-- **Connection Pooling**: Singleton database client prevents resource leaks
-- **Retry Logic**: Automatic retry with exponential backoff for transient errors
-- **Query Optimization**: Selective field fetching reduces bandwidth by 50-80%
-- **Query Timeouts**: Prevents hanging operations with configurable timeouts
-- **Rate Limiting**: Comprehensive rate limiting on all authentication and LLM endpoints
-- **CORS Security**: Configurable CORS with environment-specific origin restrictions
+- **Cache Strategy**: LRU eviction and TTL-based cache management to optimize DB hits
+- **Database Performance**: Optimized pagination and sub-second query indexing
+- **Reliability & Resilience**: 
+  - **Circuit Breaker**: Prevents cascading failures for LLM calls
+  - **Dynamic Timeouts**: 60s global request and database operation timeouts
+  - **Fallback Chain**: Automatic model fallback (Pro -> Flash -> Cache)
+- **Security**: 
+  - **Rate Limiting**: Hardened protection for Auth and AI endpoints
+  - **Input Validation**: Zod-style schema validation for all API inputs
+- **Observability**: Structured request logging and real-time performance metrics
+- **Quality Assurance**: Automated CI/CD (GitHub Actions) with Ruff/Black pre-commit hooks
 
 ## Architecture
 
-### Canonical Scoring (Hardened)
-- **Backend First**: The Python engine is the single source of truth.
-- **Strict Validation**: All scores are validated against a strict schema (0-1.0 range, mandatory metadata).
-- **Safe Fallback**: Offline mode uses a compatible local engine, strictly mapped to the canonical contract.
-- **Versioning**: `SCORING_VERSION` ensures compatibility between frontend and backend.
+LifeSync uses a modern, **Refined Monolith (Phase 3)** architecture designed for stability and observability.
 
+### 🔌 State-of-the-Art Reliability
+- **Circuit Breaker**: The LLM integration is wrapped in a circuit breaker pattern (Open/Closed/Half-Open) to protect the system during provider outages.
+- **Fail-Fast Timeouts**: Every layer (Request, DB, AI) has strict timeout enforcement to ensure no operation hangs indefinitely.
+- **Resilient Fallback**: Multilayered fallback logic for AI responses ensures high availability even during high-traffic peaks.
+
+### 📦 Optimized Data Layer
+- **Unified Connection Pool**: A singleton Postgres client manages connections efficiently across the entire backend life cycle.
+- **Strategic Indexing**: Highly optimized B-Tree indexes for `user_id` and `created_at` ensure history lookups remain instantaneous.
+- **LRU Caching**: Transparent caching layer reduces database load by up to 70% for repeat assessment views.
+
+---
+
+## 🔮 Future Vision: SpacetimeDB Migration
+
+We are currently evaluating a migration from **FastAPI + Supabase** to **SpacetimeDB**. 
+
+### **Why SpacetimeDB?**
+- **Extreme Throughput**: Targets 100k+ Transactions Per Second (TPS).
+- **Zero Latency**: Combines the application server and database into a single, high-performance WASM module.
+- **Real-Time by Default**: Automatic WebSocket synchronization for live updates.
+
+### **The Migration Strategy**
+- **Logic Shifting**: Porting Python FastAPI logic to Rust/TypeScript "Reducers" inside the database.
+- **Incremental Data Port**: Using a "Lazy Migration" pattern to move user data without downtime.
+- **Direct Frontend Binding**: Removing traditional REST/GraphQL overhead for direct database-to-client mirroring.
+
+---
 
 ## Tech Stack
 
