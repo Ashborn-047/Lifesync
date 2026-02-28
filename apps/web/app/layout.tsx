@@ -5,6 +5,7 @@ import "@/styles/animations.css";
 import Navigation from "@/components/Navigation";
 import { ToastProvider } from "@/components/ui/Toast";
 import SyncManager from "@/components/SyncManager";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -52,14 +53,16 @@ export default function RootLayout({
 
       <body className={inter.className}>
         <ToastProvider>
-          <SyncManager />
-          <div className="min-h-screen flex flex-col">
-            <Navigation />
-            <main className="flex-1 relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-cyan-900/20 pointer-events-none" />
-              <div className="relative z-10">{children}</div>
-            </main>
-          </div>
+          <ErrorBoundary>
+            <SyncManager />
+            <div className="min-h-screen flex flex-col">
+              <Navigation />
+              <main className="flex-1 relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-cyan-900/20 pointer-events-none" />
+                <div className="relative z-10">{children}</div>
+              </main>
+            </div>
+          </ErrorBoundary>
         </ToastProvider>
       </body>
     </html>
